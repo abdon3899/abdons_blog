@@ -189,7 +189,9 @@ So afterwards, I made 4 custom Python scripts to automatically extract the IPs, 
 
 You can find all 4 scripts, along with instructions on how to run them on your own T-Pot instance, in my GitHub repository here:
 
-::github{repo="abdon3899/tpot_scripts"}
+>**GitHub Repository:** [abdon3899/tpot_scripts](https://github.com/abdon3899/tpot_scripts)
+
+
 ### Findings: What the Honeypot Caught — A Week in the Wild
 
 After deploying T-Pot and running the extraction scripts, the data speaks for itself. Over the observation period, the sensors processed 487 log files from across the full T-Pot stack, catching 46,644 unique source IPs and 602 distinct IDS alert signatures. 
