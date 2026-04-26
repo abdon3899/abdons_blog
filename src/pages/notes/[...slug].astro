@@ -5,11 +5,11 @@ import Note from "@/components/note/Note.astro";
 import PageLayout from "@/layouts/Base.astro";
 
 export const getStaticPaths = (async () => {
-    const allNotes = await getCollection("note");
-    return allNotes.map((note) => ({
-        params: { slug: note.id },
-        props: { note },
-    }));
+	const allNotes = await getCollection("note");
+	return allNotes.map((note) => ({
+		params: { slug: note.slug || note.id },
+		props: { note },
+	}));
 }) satisfies GetStaticPaths;
 
 export type Props = InferGetStaticPropsType<typeof getStaticPaths>;
@@ -17,13 +17,13 @@ export type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 const { note } = Astro.props;
 
 const meta = {
-    description:
-        note.data.description ||
-        `Read about my note posted on: ${note.data.publishDate.toLocaleDateString()}`,
-    title: note.data.title,
+	description:
+		note.data.description ||
+		`Read about my note posted on: ${note.data.publishDate.toLocaleDateString()}`,
+	title: note.data.title,
 };
 ---
 
 <PageLayout meta={meta}>
-    <Note as="h1" note={note} />
+	<Note as="h1" note={note} />
 </PageLayout>
