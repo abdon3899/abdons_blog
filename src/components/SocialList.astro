@@ -1,0 +1,69 @@
+---
+import { Icon } from "astro-icon/components";
+
+/** Uses https://www.astroicon.dev/getting-started/
+	Find icons via guide: https://www.astroicon.dev/guides/customization/#open-source-icon-sets
+*/
+const socialLinks: {
+	friendlyName: string;
+	isWebmention?: boolean;
+	link: string;
+	name: string;
+	hoverColor?: string;
+}[] = [
+	{
+		name: "simple-icons:hackthebox",
+		friendlyName: "HackTheBox",
+		link: "https://app.hackthebox.com/users/1885361",
+		hoverColor: "hover:!text-[#9FEF00]",
+	},
+	{
+		name: "simple-icons:cyberdefenders",
+		friendlyName: "Cyberdefenders",
+		link: "https://cyberdefenders.org/p/abdon/",
+		hoverColor: "hover:!text-[#335EEA]",
+	},
+	{
+		name: "simple-icons:tryhackme",
+		friendlyName: "TryHackMe",
+		link: "https://tryhackme.com/p/Abd0n",
+		hoverColor: "hover:!text-[#C0392B]",
+	},
+	{
+		name: "mdi:linkedin",
+		friendlyName: "LinkedIn",
+		link: "https://www.linkedin.com/in/abdelrhman-nasr-sec/",
+		hoverColor: "hover:!text-[#0A66C2]",
+	},
+	{
+		name: "mdi:github",
+		friendlyName: "Github",
+		link: "https://github.com/YOUR_USERNAME",
+		hoverColor: "hover:!text-black dark:hover:!text-white",
+	},
+];
+---
+
+<div class="flex flex-wrap items-end gap-x-2">
+	<p>Find me on</p>
+	<ul class="flex flex-1 items-center gap-x-2 sm:flex-initial">
+		{
+			socialLinks.map(({ friendlyName, isWebmention, link, name, hoverColor }) => (
+				<li class="flex">
+					<a
+						class:list={[
+							"inline-block p-1 transition-colors duration-200",
+							hoverColor ? hoverColor : "sm:hover:text-link",
+						]}
+						href={link}
+						rel={`noreferrer ${isWebmention ? "me authn" : ""}`}
+						target="_blank"
+					>
+						<Icon aria-hidden="true" class="h-8 w-8" focusable="false" name={name} />
+						<span class="sr-only">{friendlyName}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</div>
