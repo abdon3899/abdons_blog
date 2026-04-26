@@ -5,8 +5,8 @@ import FormattedDate from "@/components/FormattedDate.astro";
 import { Image } from "astro:assets";
 
 type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
-    note: CollectionEntry<"note">;
-    isPreview?: boolean | undefined;
+	note: CollectionEntry<"note">;
+	isPreview?: boolean | undefined;
 };
 
 const { as: Tag = "div", note, isPreview = false } = Astro.props;
@@ -17,58 +17,80 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
 <div class="relative w-full">
-    
-    <article
-        class="w-full break-words"
-        class:list={[isPreview && "bg-global-text/5 inline-grid rounded-md px-4 py-3"]}
-        data-pagefind-body={isPreview ? false : true}
-    >
-        <div class="flex flex-row items-center gap-5 mb-4">
-            {!isPreview && note.data.coverImage && (
-                <Image src={note.data.coverImage} alt="Page Icon" class="w-16 h-16 object-contain flex-shrink-0 mt-1" loading="eager" />
-            )}
-            
-            <div>
-                <Tag class="title" class:list={[{ "text-base": isPreview, "text-3xl sm:text-4xl mb-1": !isPreview }]}>
-                    {isPreview ? (
-                        <a class="cactus-link" href={`/notes/${note.id}/`}>
-                            {note.data.title}
-                        </a>
-                    ) : (
-                        <>{note.data.title}</>
-                    )}
-                </Tag>
-                
-                <FormattedDate
-                    dateTimeOptions={{ hour: "2-digit", minute: "2-digit", year: "2-digit", month: "2-digit", day: "2-digit" }}
-                    date={note.data.publishDate}
-                />
-            </div>
-        </div>
-        
-        <div
-            class="prose prose-base sm:prose-lg prose-cactus mt-4 max-w-none [&>p:last-of-type]:mb-0"
-            class:list={{ "line-clamp-6": isPreview }}
-        >
-            <Content />
-        </div>
-    </article>
+	<article
+		class="w-full break-words"
+		class:list={[isPreview && "bg-global-text/5 inline-grid rounded-md px-4 py-3"]}
+		data-pagefind-body={isPreview ? false : true}
+	>
+		<div class="mb-4 flex flex-row items-center gap-5">
+			{
+				!isPreview && note.data.coverImage && (
+					<Image
+						src={note.data.coverImage}
+						alt="Page Icon"
+						class="mt-1 h-16 w-16 flex-shrink-0 object-contain"
+						loading="eager"
+					/>
+				)
+			}
 
-    {!isPreview && toc.length > 0 && (
-        <div class="hidden xl:block absolute top-0 left-[100%] ml-8 h-full">
-            <aside class="w-48 sticky top-20 border-l border-gray-800 pl-4">
-                <h2 class="font-semibold text-sm mb-3 text-accent">Table of Contents</h2>
-                <ul class="space-y-1.5 text-[11px]">
-                    {toc.map((heading) => (
-                        <li class={heading.depth === 3 ? "ml-3 opacity-70" : "font-medium"}>
-                            <a href={`#${heading.slug}`} title={heading.text} class="hover:text-accent sm:hover:underline transition-colors block truncate">
-                                {heading.text}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-            </aside>
-        </div>
-    )}
-    
+			<div>
+				<Tag
+					class="title"
+					class:list={[{ "text-base": isPreview, "mb-1 text-3xl sm:text-4xl": !isPreview }]}
+				>
+					{
+						isPreview ? (
+							<a class="cactus-link" href={`/abdons_blog/notes/${note.id}/`}>
+								{note.data.title}
+							</a>
+						) : (
+							<>{note.data.title}</>
+						)
+					}
+				</Tag>
+
+				<FormattedDate
+					dateTimeOptions={{
+						hour: "2-digit",
+						minute: "2-digit",
+						year: "2-digit",
+						month: "2-digit",
+						day: "2-digit",
+					}}
+					date={note.data.publishDate}
+				/>
+			</div>
+		</div>
+
+		<div
+			class="prose prose-base sm:prose-lg prose-cactus mt-4 max-w-none [&>p:last-of-type]:mb-0"
+			class:list={{ "line-clamp-6": isPreview }}
+		>
+			<Content />
+		</div>
+	</article>
+
+	{
+		!isPreview && toc.length > 0 && (
+			<div class="absolute top-0 left-[100%] ml-8 hidden h-full xl:block">
+				<aside class="sticky top-20 w-48 border-l border-gray-800 pl-4">
+					<h2 class="text-accent mb-3 text-sm font-semibold">Table of Contents</h2>
+					<ul class="space-y-1.5 text-[11px]">
+						{toc.map((heading) => (
+							<li class={heading.depth === 3 ? "ml-3 opacity-70" : "font-medium"}>
+								<a
+									href={`#${heading.slug}`}
+									title={heading.text}
+									class="hover:text-accent block truncate transition-colors sm:hover:underline"
+								>
+									{heading.text}
+								</a>
+							</li>
+						))}
+					</ul>
+				</aside>
+			</div>
+		)
+	}
 </div>

@@ -78,4 +78,4 @@ https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide
 
 https://sigmahq.io/
 
-[SigmacheatsheetPDF-1673525775585.pdf](/notes/the-soc-notes/sigma-rules/sigmacheatsheetpdf-1673525775585-pdf/)
+[SigmacheatsheetPDF-1673525775585.pdf](/abdons_blog/notes/the-soc-notes/sigma-rules/sigmacheatsheetpdf-1673525775585-pdf/)

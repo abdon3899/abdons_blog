@@ -33,7 +33,10 @@ const latestNotes = allNotes
 	<section>
 		<h1 class="title mb-12">Yooooo wsgood guys, I'm Abdon.</h1>
 		<p class="mb-4">
-			I am a Computer Science student and cybersecurity enthusiast specializing in blue team operations. My focus areas include digital forensics, incident response, threat hunting, and SOC operations. I use this space to document my technical security training, share write-ups, and highlight the projects I work on.
+			I am a Computer Science student and cybersecurity enthusiast specializing in blue team
+			operations. My focus areas include digital forensics, incident response, threat hunting, and
+			SOC operations. I use this space to document my technical security training, share write-ups,
+			and highlight the projects I work on.
 		</p>
 		<SocialList />
 	</section>
@@ -52,7 +55,7 @@ const latestNotes = allNotes
 		)
 	}
 	<section class="mt-16">
-		<h2 class="title text-accent mb-6 text-xl"><a href="/posts/">Posts</a></h2>
+		<h2 class="title text-accent mb-6 text-xl"><a href="/abdons_blog/posts/">Posts</a></h2>
 		<ul class="space-y-4" role="list">
 			{
 				latestPosts.map((p) => (
@@ -67,7 +70,7 @@ const latestNotes = allNotes
 		latestNotes.length > 0 && (
 			<section class="mt-16">
 				<h2 class="title text-accent mb-6 text-xl">
-					<a href="/notes/">Notes</a>
+					<a href="/abdons_blog/notes/">Notes</a>
 				</h2>
 				<ul class="space-y-6" role="list">
 					{latestNotes.map((note) => (

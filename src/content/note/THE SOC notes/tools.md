@@ -8,23 +8,23 @@ coverImage: "./Gifs/tools.gif"
 
 
 
-[**Autopsy**](/notes/the-soc-notes/tools/autopsy/)
+[**Autopsy**](/abdons_blog/notes/the-soc-notes/tools/autopsy/)
 
-[RedLine](/notes/the-soc-notes/tools/redline/)
+[RedLine](/abdons_blog/notes/the-soc-notes/tools/redline/)
 
-[**KAPE**](/notes/the-soc-notes/tools/kape/)
+[**KAPE**](/abdons_blog/notes/the-soc-notes/tools/kape/)
 
-[Volatility ](/notes/the-soc-notes/tools/volatility/)
+[Volatility ](/abdons_blog/notes/the-soc-notes/tools/volatility/)
 
-[Splunk](/notes/the-soc-notes/tools/splunk/)
+[Splunk](/abdons_blog/notes/the-soc-notes/tools/splunk/)
 
-[Sigma rules ](/notes/the-soc-notes/tools/sigma-rules/)
+[Sigma rules ](/abdons_blog/notes/the-soc-notes/tools/sigma-rules/)
 
-[ELK](/notes/the-soc-notes/tools/elk/)
+[ELK](/abdons_blog/notes/the-soc-notes/tools/elk/)
 
-[Endpoint Detection and Response ](/notes/the-soc-notes/tools/endpoint-detection-and-response/)
+[Endpoint Detection and Response ](/abdons_blog/notes/the-soc-notes/tools/endpoint-detection-and-response/)
 
-[**Atomic Red Team**](/notes/the-soc-notes/tools/atomic-red-team/)
+[**Atomic Red Team**](/abdons_blog/notes/the-soc-notes/tools/atomic-red-team/)
 
 mobile:
 

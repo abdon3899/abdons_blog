@@ -15,27 +15,27 @@ A cybersecurity function focused on detecting, managing, and mitigating adversar
 
 **incident Response Process consists of six phases:**
 
-[**Preparation**](/notes/the-soc-notes/incident-response/preparation/)
+[**Preparation**](/abdons_blog/notes/the-soc-notes/incident-response/preparation/)
 
 - Establish IR procedures, policies, and tools.
 - Train personnel, define roles, and create IR plans/playbooks.
 
-[**Identification** ](/notes/the-soc-notes/incident-response/identification/)
+[**Identification** ](/abdons_blog/notes/the-soc-notes/incident-response/identification/)
 
 - Detect and confirm security incidents.
 - Use monitoring tools (SIEM, EDR, logs).
 
-[**Threat Intel & Containment**](/notes/the-soc-notes/incident-response/threat-intel-containment/)
+[**Threat Intel & Containment**](/abdons_blog/notes/the-soc-notes/incident-response/threat-intel-containment/)
 
 - Determine the extent of the incident (affected systems, data at risk, impact).
 - Isolate affected systems to prevent spread.
 - Preserve forensic evidence.
 
-[**Eradication** ](/notes/the-soc-notes/incident-response/eradication/)
+[**Eradication** ](/abdons_blog/notes/the-soc-notes/incident-response/eradication/)
 
 - Remove malware, backdoors, and adversarial artifacts.
 - Restore systems to normal operations.
 
-[**Lessons Learned** ](/notes/the-soc-notes/incident-response/lessons-learned/)
+[**Lessons Learned** ](/abdons_blog/notes/the-soc-notes/incident-response/lessons-learned/)
 
 - Conduct a post-incident review, update IR plans, and improve defenses.

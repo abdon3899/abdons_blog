@@ -10,11 +10,12 @@ import myLogo from "@/assets/logo3.png";
 <header class="group relative mb-28 flex items-center sm:ps-18" id="main-header">
 	<div class="flex sm:flex-col">
 		<a
-			aria-current={Astro.url.pathname === "/" ? "page" : false}
+			aria-current={Astro.url.pathname === "/abdons_blog/" ? "page" : false}
 			class="inline-flex items-center sm:relative sm:inline-block sm:grayscale sm:hover:filter-none"
-			href="/"
+			href="/abdons_blog/"
 		>
-			{/*
+			{
+				/*
 			<svg
 				aria-hidden="true"
 				class="me-3 h-10 w-6 sm:absolute sm:-start-18 sm:me-0 sm:h-20 sm:w-12"
@@ -35,18 +36,16 @@ import myLogo from "@/assets/logo3.png";
 					d="m136 53.333 45.333-26.666v120L226.667 120V80L272 53.333V160l-90.667 53.333v240L136 480V306.667L45.334 360V220l45.333-26.667v73.334L136 240z"
 				></path>
 			</svg>
-			*/}
-			
-					
-			<Image 
-				src={myLogo} 
-				alt="My Site Logo" 
-				width={48} 
-				height={48} 
-				class="me-3 h-10 w-auto object-contain sm:absolute sm:-start-18 sm:me-0 sm:h-15" 
-			/>
-			
+			*/
+			}
 
+			<Image
+				src={myLogo}
+				alt="My Site Logo"
+				width={48}
+				height={48}
+				class="me-3 h-10 w-auto object-contain sm:absolute sm:-start-18 sm:me-0 sm:h-15"
+			/>
 
 			<span class="text-xl font-bold sm:text-2xl">{siteConfig.title}</span>
 		</a>

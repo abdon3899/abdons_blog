@@ -22,7 +22,7 @@ import { expressiveCodeOptions, siteConfig } from "./src/site.config";
 // https://astro.build/config
 export default defineConfig({
   site: "https://abdon3899.github.io",
-  base: "/abdons_blog/", 
+  base: "/abdons_blog",
 	image: {
 		domains: ["webmention.io"],
 	},
@@ -41,22 +41,22 @@ export default defineConfig({
 			icon: "public/icon11.svg", // the source for generating favicon & icons
 			icons: [
 				{
-					src: "icons/apple-touch-icon.png", // used in src/components/BaseHead.astro L:26
+					src: "/abdons_blog/icons/apple-touch-icon.png",
 					sizes: "180x180",
 					type: "image/png",
 				},
 				{
-					src: "icons/icon-192.png",
+					src: "/abdons_blog/icons/icon-192.png",
 					sizes: "192x192",
 					type: "image/png",
 				},
 				{
-					src: "icons/icon-512.png",
+					src: "/abdons_blog/icons/icon-512.png",
 					sizes: "512x512",
 					type: "image/png",
 				},
 			],
-			start_url: "/",
+			start_url: "/abdons_blog/",
 			background_color: "#1d1f21",
 			theme_color: "#2bbc8a",
 			display: "standalone",

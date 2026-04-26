@@ -53,4 +53,4 @@ maintain a history of activity performed on the host and the amount of logging d
 - **Auth logs:** information about users and authentication-related logs. found at `/var/log/auth.log`
 - **Third-party logs:**  logs for apps like webserver, database, or file share server logs.found at `/var/log`
 
-[LinuxForensicsCheatsheet-1651286283085.pdf](/notes/the-soc-notes/linux-forensics/linuxforensicscheatsheet-1651286283085-pdf/)
+[LinuxForensicsCheatsheet-1651286283085.pdf](/abdons_blog/notes/the-soc-notes/linux-forensics/linuxforensicscheatsheet-1651286283085-pdf/)
