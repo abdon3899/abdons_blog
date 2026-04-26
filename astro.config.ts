@@ -21,8 +21,8 @@ import { expressiveCodeOptions, siteConfig } from "./src/site.config";
 
 // https://astro.build/config
 export default defineConfig({
-	site: siteConfig.url,
-	base: "/abdons_blog",
+  site: "https://abdon3899.github.io",
+  base: "/abdons_blog/", 
 	image: {
 		domains: ["webmention.io"],
 	},
