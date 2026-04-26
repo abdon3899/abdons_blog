@@ -6,8 +6,6 @@ tags: ["sans504"]
 slug: "sec-504/sans504/sec-504-book2"
 ---
 
-# Sec 504 book2
-
 in order to defend probably we need to understand how hackers move and operate , this book covers attack concepts we examine them and learn about attacker tools, techniques, and procedures (TTPs) , to defend better.
 
 ![anonymous-anonymous-bites-back.gif](./Sec_504_book2/anonymous-anonymous-bites-back.gif)

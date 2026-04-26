@@ -6,7 +6,6 @@ tags: ["sans504"]
 slug: "sec-504/sans504/sec-504-book1"
 ---
 
-# Sec 504 book1
 
 incidence’s happens every where and you cant possibly be 100% your safe , the question isn't if you will get compromised  but when , the main ai is to reduce the time need ed to detect an incident ,
 

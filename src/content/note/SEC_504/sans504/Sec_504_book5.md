@@ -6,8 +6,6 @@ tags: ["sans504"]
 slug: "sec-504/sans504/sec-504-book5"
 ---
 
-# Sec 504 book5
-
 the last book already :(  ,so here we will start to shift into focus what attacker do post exploitation, ofc then don't just sit in the system what do they do we’ll find out here.
 
 ## Endpoint Security Bypass:

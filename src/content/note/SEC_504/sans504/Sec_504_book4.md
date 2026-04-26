@@ -6,8 +6,6 @@ tags: ["sans504"]
 slug: "sec-504/sans504/sec-504-book4"
 ---
 
-# Sec 504 book4
-
 here we’ll start to get more into the tools and attacks used to compromise targets, so heads up and keep your eyes open to learn and spots these attacks from the first sight.  
 
 ![sniper-pubg.gif](./Sec_504_book4/sniper-pubg.gif)

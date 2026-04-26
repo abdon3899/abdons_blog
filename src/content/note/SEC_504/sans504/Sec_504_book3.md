@@ -6,8 +6,6 @@ tags: ["sans504"]
 slug: "sec-504/sans504/sec-504-book3"
 ---
 
-# Sec 504 book3
-
 password the ultimate prize for an attacker giving him unconditional access and maybe giving him some juicy files to use , here we’ll study how attacker may get there hands in ur lovely passwords and how you can keep them safe. 
 
 ## Password Attacks:
