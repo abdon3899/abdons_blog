@@ -2,66 +2,78 @@
 import PageLayout from "@/layouts/Base.astro";
 
 const meta = {
-    description: "I'm a starter theme for Astro.build",
-    title: "About",
+	description: "I'm a starter theme for Astro.build",
+	title: "About",
 };
 ---
 
 <PageLayout meta={meta}>
-    <div class="fixed-background"></div>
+	<div class="fixed-background"></div>
 
-    <div class="about-content space-y-6">
-        
-        <h1 class="title">About</h1>
+	<div class="about-content space-y-6">
+		<h1 class="title">About</h1>
 
-        <p>
-            <strong>just a chill dude tryin to <strong>"يستمر" </strong>  , your avrage 4N6 eenjoyer , i read logs for fun</strong>
-        </p>
+		<p>
+			<strong
+				>just a chill dude tryin to <strong>"يستمر" </strong> , your avrage 4N6 enjoyer , i read logs
+				for fun</strong
+			>
+		</p>
 
-        <p>
-            I generally spend my time doing HackTheBox CTFs and CyberDefenders. I've tackled a variety of challenges ranging from Windows to Linux, with some macOS and Android thrown in along the way. I've seen my fair share of memory dumps and network pcaps. From time to time, I also dive into reverse engineering challenges or collaborate on active malware analysis with my boys.
-        </p>
+		<p>
+			I generally spend my time doing HackTheBox CTFs and CyberDefenders. I've tackled a variety of
+			challenges ranging from Windows to Linux, with some macOS and Android thrown in along the way.
+			I've seen my fair share of memory dumps and network pcaps. From time to time, I also dive into
+			reverse engineering challenges or collaborate on active malware analysis with my boys.
+		</p>
 
-        <h2 class="title text-xl">Off the Keyboard</h2>
-        <p>
-            Outside of security, I just love learning about all kinds of stuff. And when the five-stack finally assembles, I'll hop on for a couple of League of Legends games ARAM games.
-        </p>
+		<h2 class="title text-xl">Off the Keyboard</h2>
+		<p>
+			Outside of security, I just love learning about all kinds of stuff. And when the five-stack
+			finally assembles, I'll hop on for a couple of League of Legends games ARAM games.
+		</p>
 
-        <div class="flex justify-center mt-12">
-            <script is:inline src="https://cyberdefenders.org/p/abdon/badge"></script>
-        </div>
-        
-    </div>
+		<div class="mt-12 flex justify-center">
+			<script is:inline src="https://cyberdefenders.org/p/abdon/badge"></script>
+		</div>
+	</div>
 </PageLayout>
 
 <style>
-  .fixed-background {
-    /* This breaks the image out of the box and locks it to the screen */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1; /* Sends the image all the way to the back */
+	.fixed-background {
+		/* This breaks the image out of the box and locks it to the screen */
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		z-index: -1; /* Sends the image all the way to the back */
 
-    background-image: url('../../src/assets/spider_wall.jpg'); 
-    background-size: cover;
-    background-position: center;
+		background-image: url("../../src/assets/spider_wall.jpg");
+		background-size: cover;
+		background-position: center;
 
-    /* Magic design: Apply CSS filters to match the greyscale theme */
-    filter: grayscale(100%) brightness(30%);
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%);
-  }
+		/* Magic design: Apply CSS filters to match the greyscale theme */
+		filter: grayscale(100%) brightness(30%);
+		mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%);
+	}
 
-  /* Ensure text remains highly legible */
-  .about-content {
-    position: relative; 
-    z-index: 10;
-    color: rgba(255, 255, 255, 0.9); 
-    padding-bottom: 4rem; /* Adds a little breathing room at the bottom */
-  }
+	/* Ensure text remains highly legible */
+	.about-content {
+		position: relative;
+		z-index: 10;
+		color: rgba(255, 255, 255, 0.9);
+		padding-bottom: 4rem; /* Adds a little breathing room at the bottom */
+	}
 
-  .about-content .title { color: white; }
-  .about-content a { color: var(--theme-link); }
-  .about-content p, .about-content span { color: rgba(255,255,255,0.8); }
+	.about-content .title {
+		color: white;
+	}
+	.about-content a {
+		color: var(--theme-link);
+	}
+	.about-content p,
+	.about-content span {
+		color: rgba(255, 255, 255, 0.8);
+	}
 </style>

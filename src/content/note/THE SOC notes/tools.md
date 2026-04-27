@@ -8,11 +8,11 @@ coverImage: "./Gifs/tools.gif"
 
 
 
-[**Autopsy**](/abdons_blog/notes/the-soc-notes/tools/autopsy/)
+[Autopsy](/abdons_blog/notes/the-soc-notes/tools/autopsy/)
 
 [RedLine](/abdons_blog/notes/the-soc-notes/tools/redline/)
 
-[**KAPE**](/abdons_blog/notes/the-soc-notes/tools/kape/)
+[KAPE](/abdons_blog/notes/the-soc-notes/tools/kape/)
 
 [Volatility ](/abdons_blog/notes/the-soc-notes/tools/volatility/)
 
@@ -24,10 +24,11 @@ coverImage: "./Gifs/tools.gif"
 
 [Endpoint Detection and Response ](/abdons_blog/notes/the-soc-notes/tools/endpoint-detection-and-response/)
 
-[**Atomic Red Team**](/abdons_blog/notes/the-soc-notes/tools/atomic-red-team/)
+[Atomic Red Team](/abdons_blog/notes/the-soc-notes/tools/atomic-red-team/)
 
 mobile:
 
-[https://github.com/MobSF/Mobile-Security-Framework-MobSF](https://github.com/MobSF/Mobile-Security-Framework-MobSF)
+
+https://github.com/MobSF/Mobile-Security-Framework-MobSF
 
 https://beta.pithus.org/

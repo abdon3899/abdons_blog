@@ -13,8 +13,8 @@ coverImage: "./Gifs/file_system.gif"
 
 [**MBR and GPT Analysis**](/abdons_blog/notes/the-soc-notes/file-system-analysis/mbr-and-gpt-analysis/)
 
-[NTFS](/abdons_blog/notes/the-soc-notes/file-system-analysis/ntfs/)
+[**NTFS**](/abdons_blog/notes/the-soc-notes/file-system-analysis/ntfs/)
 
-[EXT Analysis](/abdons_blog/notes/the-soc-notes/file-system-analysis/ext-analysis/)
+[**EXT Analysis**](/abdons_blog/notes/the-soc-notes/file-system-analysis/ext-analysis/)
 
 [**File Carving**](/abdons_blog/notes/the-soc-notes/file-system-analysis/file-carving/)

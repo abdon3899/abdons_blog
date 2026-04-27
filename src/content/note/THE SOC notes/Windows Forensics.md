@@ -117,9 +117,7 @@ During forensic analysis, identifying USB and removable drives connected to a sy
 - **First/Last Times:** tracks USB device connection history, including first, last connection, and last removal times: `SYSTEM\CurrentControlSet\Enum\USBSTOR\Ven_Prod_Version\USBSerial#\Properties\{83da6326-97a6-4088-9453-a19231573b29}\####` where #### is  0064 for first connection time, 0066 for last connection time, and 0067 for last removal time
 - **USB device Volume Name:** Drive names can be found at:`SOFTWARE\Microsoft\Windows Portable Devices\Devices`
 
-[Windows Forensics Cheatsheet.pdf](/abdons_blog/notes/the-soc-notes/windows-forensics/windows-forensics-cheatsheet-pdf/)
 
-room2
 
 ## **The File Allocation Table (FAT):**
 

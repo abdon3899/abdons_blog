@@ -8,11 +8,11 @@ export const GET = async () => {
 	return rss({
 		title: siteConfig.title,
 		description: siteConfig.description,
-		site: import.meta.env.SITE,
+		site: siteConfig.url,
 		items: notes.map((note) => ({
 			title: note.data.title,
 			pubDate: note.data.publishDate,
-			link: `notes/${note.id}/`,
+			link: `notes/${note.data.slug || note.id}/`,
 		})),
 	});
 };
