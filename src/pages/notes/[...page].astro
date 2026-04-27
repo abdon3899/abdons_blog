@@ -11,15 +11,19 @@ export const getStaticPaths = (async ({ paginate }) => {
 	const MAX_NOTES_PER_PAGE = 20;
 	const allNotes = await getCollection("note");
 
-	// The Magic Filter
-	const topLevelNotes = allNotes.filter((note) => note.id.split("/").length === 2);
+	// The Magic Filter: only show top-level notes that have subpages
+	const topLevelNotes = allNotes.filter((note) => {
+		const parts = note.id.split("/");
+		if (parts.length !== 2) return false;
+		// Check if there is a subfolder with the same name
+		return allNotes.some((subNote) => subNote.id.startsWith(`${note.id.replace(".md", "/")}/`));
+	});
 
 	return paginate(topLevelNotes.sort(collectionDateSort), { pageSize: MAX_NOTES_PER_PAGE });
 }) satisfies GetStaticPaths;
 
 interface Props {
 	page: Page<CollectionEntry<"note">>;
-	uniqueTags: string[];
 }
 
 const { page } = Astro.props;

@@ -126,7 +126,10 @@ const descYearKeys = Object.keys(groupedByYear).sort((a, b) => +b - +a);
 					<ul class="flex flex-wrap gap-2">
 						{uniqueTags.map((tag) => (
 							<li>
-								<a class="cactus-link flex items-center justify-center" href={`/tags/${tag}/`}>
+								<a
+									class="cactus-link flex items-center justify-center"
+									href={`/abdons_blog/tags/${tag}/`}
+								>
 									<span aria-hidden="true">#</span>
 									<span class="sr-only">View all posts with the tag</span>
 									{tag}
@@ -135,7 +138,7 @@ const descYearKeys = Object.keys(groupedByYear).sort((a, b) => +b - +a);
 						))}
 					</ul>
 					<span class="mt-4 block sm:text-end">
-						<a class="hover:text-link" href="/tags/">
+						<a class="hover:text-link" href="/abdons_blog/tags/">
 							View all <span aria-hidden="true">→</span>
 							<span class="sr-only">blog tags</span>
 						</a>

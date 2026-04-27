@@ -24,7 +24,15 @@ const pinnedPosts = allPostsByDate
 // Notes, set to a max of 5
 const MAX_NOTES = 5;
 const allNotes = await getCollection("note");
-const latestNotes = allNotes
+// Filter to only top-level notes with subpages
+const filteredNotes = allNotes.filter((note) => {
+	const parts = note.id.split("/");
+	if (parts.length !== 2) return false;
+
+	// Check if there is a subfolder with the same name
+	return allNotes.some((subNote) => subNote.id.startsWith(`${note.id.replace(".md", "/")}/`));
+});
+const latestNotes = filteredNotes
 	.sort(collectionDateSort)
 	.slice(0, MAX_NOTES) as CollectionEntry<"note">[];
 ---
