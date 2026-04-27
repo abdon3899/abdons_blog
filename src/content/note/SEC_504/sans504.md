@@ -1,14 +1,11 @@
 ---
-title: "sec504"
-description: "My personal SOC notes and research on Logs."
+title: "Security 504"
+description: "My personal notes on SEC-504: Hacker Tools, Techniques, and Incident Handling."
 publishDate: "2026-04-19T00:00:00Z"
 tags: ["sans"]
 slug: "sec-504/sans504"
 ---
 
-# sans504
-
-## how will i study :
 
 > **if you are going too fast to take good notes, you are just going too fast!**
 
