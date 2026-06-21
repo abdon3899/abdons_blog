@@ -12,6 +12,8 @@ coverImage:
 
 بسم الله الرحمن الرحيم
 
+https://app.hackthebox.com/sherlocks/Ruse
+
 So I hate macOS. I hate Apple laptops in general, so I was not going to do this lab. But one day I wanted to do a hard Sherlock and I had already done all of the active ones at that time, so I just looked at this Sherlock and was like "ok ok I'll do this Mac one."
 
 Let's start with the description:
