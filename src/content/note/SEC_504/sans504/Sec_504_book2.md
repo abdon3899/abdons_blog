@@ -6,252 +6,469 @@ tags: ["sans504"]
 slug: "sec-504/sans504/sec-504-book2"
 ---
 
-in order to defend probably we need to understand how hackers move and operate , this book covers attack concepts we examine them and learn about attacker tools, techniques, and procedures (TTPs) , to defend better.
+In order to defend, we first need to understand how hackers move and operate. This book covers attack concepts — we examine attacker tools, techniques, and procedures (TTPs) so we can defend better.
 
 ![anonymous-anonymous-bites-back.gif](./Sec_504_book2/anonymous-anonymous-bites-back.gif)
 
-## MITRE ATT&CK Framework:
+## MITRE ATT&CK Framework
 
-the MITRE ATT&CK (Adversarial Tactics, Techniques and Common Knowledge) framework. MITRE is a not-for-profit US company. the framework helps us map known adversary tactics, techniques, and procedures. also characterizing techniques used by adversary's , and identifying adversary groups. the enterprise matrix [https://attack.mitre.org](https://attack.mitre.org/) the categories are column, and techniques populate the columns. 
+The MITRE ATT&CK (Adversarial Tactics, Techniques, and Common Knowledge) framework is maintained by MITRE, a not-for-profit US company. The framework helps us map known adversary tactics, techniques, and procedures, characterize techniques used by adversaries, and identify adversary groups.
 
-## Open-Source Intelligence:
+:::note
+The enterprise matrix lives at [attack.mitre.org](https://attack.mitre.org/). Tactics are the columns, and techniques populate each column.
+:::
 
-reconnaissance helps an attacker to get a fell of your network before firing a packet, just like real world you try to gather as much info before you attack , like for example if your robing a bank , you’ll try to know the guards when they move , camera places , the mount of money , you’ll try to get your hand on some blueprints of the building , and so on. We can classify attackers into 2 main categories, non-discriminating who search any target that venerable to a venerability they know , more like a script kiddie , they skip recon and head straight to action. and attackers who focus in there target, before doing any thing they conduct detailed recon analysis to get as much info as they can about a target as this data will come in handy during the attack. 
+## Open-Source Intelligence (OSINT)
 
-### Planned Sharing:
+Reconnaissance helps an attacker get a feel for your network before firing a single packet — just like in the real world, where you'd gather as much info as possible before robbing a bank: when the guards move, where the cameras are, how much money is on site, and maybe even the building's blueprints.
 
-information that are shared online such as annual reports, contact information, website information, etc.
+We can classify attackers into two main categories:
 
-### Unplanned Sharing:
+- **Non-discriminating attackers** — search for any target vulnerable to a known weakness. More like script kiddies, they skip recon and head straight to action.
+- **Targeted attackers** — focus on a specific target. Before doing anything, they conduct detailed recon to gather as much info as possible, since that data comes in handy during the attack itself.
 
-Organizations share data online , and some  this is leaked information but not recognized as leaked by the organization (such as employee social media use), and sometimes it is the publication of leaked data obtained illegally (such as compromised passwords, stolen documents)
+### Planned Sharing
 
-OSINT is collecting all data into useful manner , giving the attacker critical info ,like username emails , server host name , or more technical like the CEO word version. ID T1266  
+Information shared online intentionally — annual reports, contact information, website content, etc.
 
-### WHOIS:
+### Unplanned Sharing
 
-when registering a domain they collect info about the registrant , like name number mail and so on , but after 2016  with the introduction of the European requirements for General Data Protection Regulation (GDPR) , though you still will find data but mostly unimportant  **ID T1596.002 .**
+Organizations leak data online without realizing it. Sometimes this is unrecognized leaked information (like employee social media use), and sometimes it's the publication of data obtained illegally (compromised passwords, stolen documents).
 
-### Certificate Transparency:
+:::note
+OSINT is the practice of collecting all this scattered data into something useful — usernames, emails, server hostnames, or even something as specific as the CEO's Word version metadata. **MITRE ID: T1591.**
+:::
 
-the new who is , as new browser sue SSL/TLS certificates , this helps us to verify legit sites. Certificate transparency is a CA requirement where they must publish logs of all issued certificates. its used by attackers to get the organization host name. you can get it all here [https://crt.sh](https://crt.sh) , you can also get tings that is not yet publicly available.
+### WHOIS
 
-### haveibeenpwned:
+When registering a domain, registrars collect info about the registrant — name, number, email, and so on. After 2016, with the introduction of GDPR, most of that data is redacted, though you'll still find some unimportant fields exposed. **MITRE ID: T1596.002.**
 
-this sites check collects lists of usernames and passwords from major website breaches. it dose not provide the passwords but it shows breaches that leaded this info, its sometimes possible to collect the usernames and passwords associated with the known breaches. 
+### Certificate Transparency
 
-### OSINT Data Collection:
+Think of this as the new WHOIS. As browsers increasingly require SSL/TLS certificates to verify legitimate sites, Certificate Transparency became a CA requirement — CAs must publish logs of all issued certificates. Attackers use these logs to enumerate an organization's hostnames.
 
-the main problem with osint  is in collect data from many different sources each provide different data most of the services are free but some are paid , The accessibility and confidence in OSINT data sources can also be a challenge, there are some OSINT data aggregator tools that can help.
+:::tip
+[crt.sh](https://crt.sh) lets you search certificate transparency logs — sometimes surfacing subdomains that aren't yet publicly known elsewhere.
+:::
 
-### SpiderFoot:
+### Have I Been Pwned
 
-is an open source osint data collection and analyzing tool, it collects data from hundreds of online sources and shows it to you , it supports graphical view of data.
+This site aggregates lists of usernames and passwords from major breaches. It doesn't hand out the actual passwords, but it does show which breaches a given account appeared in — and from there it's sometimes possible to correlate usernames with leaked passwords found elsewhere.
 
-when dose osint stops:
+### OSINT Data Collection
 
-collect data from public sites and third parties , when you interact directly withe the target this is no longer OSINT
+The main challenge with OSINT is that data lives across many different sources, each providing a different piece of the picture. Most services are free, but some are paid, and accessibility/confidence in the data varies. This is where OSINT aggregator tools help.
+
+### SpiderFoot
+
+:::tip
+SpiderFoot is an open-source OSINT data collection and analysis tool. It pulls data from hundreds of online sources and presents it with a graphical view of relationships.
+:::
+
+**When does OSINT stop?**
+
+OSINT means collecting data from public sites and third parties. The moment you interact directly with the target, you've crossed out of OSINT territory.
 
 ![image.png](./Sec_504_book2/image.png)
 
-## DNS Interrogation:
+## DNS Interrogation
 
-Domain Name System (DNS) provide valuable recon info for an attacker , as it provides Ip addresses , host names, emails, Mail eXchange (MX) records and more. the two primary tools used are `Nslookup`and `Dig`.
+DNS provides valuable recon info for an attacker — IP addresses, hostnames, emails, MX records, and more. The two primary tools for this are `nslookup` and `dig`.
 
-### Zone Transfer:
+### Zone Transfer
 
-zone transfer allows the attacker to connect to DNS server and get all records about a domain , from this dump attacker can see what machines are available on the internet, we can run a zone transfer using this commands `nslookup`, `server dnsserver`, `set type=AXFR` , `ls -d targetdomain`  the set means we want all types of DNS records. this will work for windows and some versions of Linux, so we’ll use this `dig @dnsserverip targetdomain AXFR` .
+A zone transfer lets an attacker connect to a DNS server and pull every record for a domain in one dump — revealing what machines are reachable on the internet. To attempt a zone transfer:
 
-### Automated Interrogation:
+```bash title="Manual zone transfer via nslookup"
+nslookup
+server dnsserver
+set type=AXFR
+ls -d targetdomain
+```
 
-most DNS servers will not permit zone transfer , so we’ll use Automated Interrogation, is uses a list of command host names and a target domain to determine if the DNS name is present in the DNS server. to do in we’ll have to use a tool like Nmap , like this command `sudo nmap --script dns-brute --script-args dnsbrute.domain=holidayhackchallenge.com,dns-brute.threads=6,dnsbrute.hostlist=./namelist.txt -sS -p 53`  lets break this command down to understand it , `--script-args` start the argument the script will take , `dns-brute.domain` specify the domain name, `dns-brute.threads` specify the number of requests that can be sent in the same time, `dns-brute.hostlist` specify the wordlist, the rest of the line is jus needed commands. the better the wordlist the better the out come,  a good ward list be be found [here](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS).
+The `set type=AXFR` line tells `nslookup` we want all record types. This works on Windows and some Linux versions. On other systems, use:
 
-### Defending:
+```bash title="Zone transfer via dig"
+dig @dnsserverip targetdomain AXFR
+```
 
-to defend DNS recon , we need to limit the zone Transfer , the primary DNS server should only allow zone Transfer from secondary or tertiary DNS servers, these servers should deny all zone Transfer requests , use split DNS , you’ll have two DNS servers internal and external. public DNS  info is loaded into the external and the internal can only be accessed from inside your network , this will prevent the attacker from accessing your DNS server. 
+:::caution
+Most DNS servers today don't permit zone transfers — they're considered a misconfiguration. If you get one, it's a serious finding.
+:::
 
-use DNS server logging to identify any attack , you can use Windows DNS logging , you can easily get mixed between legit DNS and an attack so be cautious  when tacking actions, what you should o is report this Ip to the threat intel team and add it to a watch list until your sure its an attack.
+### Automated Interrogation
+
+Since zone transfers are usually blocked, attackers fall back on automated interrogation — brute-forcing a list of common hostnames against a target domain to see which ones resolve. Nmap handles this well:
+
+```bash title="DNS subdomain brute-force with Nmap NSE"
+sudo nmap --script dns-brute --script-args dnsbrute.domain=holidayhackchallenge.com,dns-brute.threads=6,dnsbrute.hostlist=./namelist.txt -sS -p 53
+```
+
+Breaking this down: `--script-args` opens the argument list for the script, `dns-brute.domain` sets the target domain, `dns-brute.threads` sets how many requests fire concurrently, and `dns-brute.hostlist` points to the wordlist. The rest of the line is standard Nmap syntax.
+
+:::tip
+The quality of your wordlist directly determines the quality of your results. A solid starting point is [SecLists' DNS discovery wordlists](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS).
+:::
+
+### Defending
+
+To defend against DNS recon:
+
+- Limit zone transfers — the primary DNS server should only allow transfers to secondary/tertiary DNS servers, and those servers should deny all transfer requests.
+- Use split DNS — run separate internal and external DNS servers, so only public info is exposed externally and the internal server is reachable only from inside your network.
+- Enable DNS server logging (e.g., Windows DNS logging) to spot brute-force or transfer attempts.
+
+:::warning
+It's easy to confuse legitimate DNS traffic with an attack, so be cautious before taking action on what looks suspicious. The right move is to report the IP to your threat intel team and add it to a watch list until you're confident it's malicious.
+:::
 
 ![image.png](./Sec_504_book2/c5fa4d05-703f-46ec-ab63-c979864882d8.png)
 
-## Website Reconnaissance:
+## Website Reconnaissance
 
-corporate websites often have info like phone numbers or emails which are useful for social engineering , some site maty include description about their platform or architecture. 
+Corporate websites often leak info like phone numbers or emails that are useful for social engineering. Some sites also describe their own platform or architecture in more detail than they should.
 
-### Exiftool:
+### Exiftool
 
-after getting a document using exiftool can help you get all the meta data from it , some times it shows the app used to created this document , and the machine and os, which attacker may get CVE’s that found in these versions.
+After obtaining a document, `exiftool` can pull its metadata — sometimes revealing the application used to create it, along with the OS and machine details. An attacker can use this to hunt for CVEs affecting those specific versions.
 
-### Website Crawl and Wordlist Generation:
+### Website Crawling and Wordlist Generation
 
-CeWL (Custom Word List generator) is a tool that collect all web pages from a target , and common file formats, to make a wordlist emails, metadata. this commands get words that +8 characters and file metadata and mails from the whitehous.gov site `cewl.rb -m 8 -w whitehouse.txt -a --meta_file whitehouse-meta.txt -e --email_file whitehouse-email.txt https://www.whitehouse.gov/` 
+:::tip
+CeWL (Custom Word List generator) crawls a target's web pages and common file formats to build a wordlist of words, emails, and metadata.
+:::
 
-### Search Engines:
+Example — pull words 8+ characters long, plus metadata and emails, from whitehouse.gov:
 
-using things like google search modifiers we can get thing that not visible in normal search, Google Hacking Database (GHDB) have a lot of useful searches to locate many problems on target domains. Fast Google Dork Scan (FGDS) is a script that uses Google Dorks and a target domain name to acquire information about a target organization.
+```bash title="Crawling a site with CeWL"
+cewl.rb -m 8 -w whitehouse.txt -a --meta_file whitehouse-meta.txt -e --email_file whitehouse-email.txt https://www.whitehouse.gov/
+```
 
-### Other Website Information:
+### Search Engines
 
-The U.S. Securities and Exchange Commission (SEC) help when getting data collecting data for public US traded companies. sites such as namechk and WhatsMyName.app will help u get even more info. other sites include www.shodan.io www.network-tools.com viewdns.info www.securityspace.com .
+Google search modifiers ("Google dorking") surface content that doesn't show up in a normal search. The Google Hacking Database (GHDB) catalogs a huge number of useful dork queries for finding exposed data on target domains. Fast Google Dork Scan (FGDS) is a script that automates running GHDB dorks against a target domain.
 
-### Defending:
+### Other Website Information
 
-chick osint once in while to make sure there’s no data leaked , you can also add robots.txt to your site to block some urls from showing in searches but be carful of not being so obvious of what your hiding , because any one can just access the robots.txt file and see what you **Disallow** , take a look at your logs as they will notify you before anything happens.
+The U.S. Securities and Exchange Commission (SEC) is a useful source when researching publicly traded US companies. Sites like namechk and WhatsMyName.app help correlate usernames across platforms. Other useful sites include [shodan.io](https://www.shodan.io), [network-tools.com](https://www.network-tools.com), [viewdns.info](https://viewdns.info), and [securityspace.com](https://www.securityspace.com).
+
+### Defending
+
+Periodically check your own OSINT footprint to make sure nothing's leaked. You can add a `robots.txt` to block certain URLs from search indexing — but be careful: anyone can simply view `robots.txt` directly and see exactly what you're trying to hide via `Disallow` entries. Keep an eye on your logs, since they'll often flag suspicious activity before it escalates.
 
 ![image.png](./Sec_504_book2/0cd128b4-9d5c-4f72-9e09-0acf951a78d2.png)
 
-## Network and Host Scanning with Nmap:
+## Network and Host Scanning with Nmap
 
-an attacker must under stand the network topology has working with, the layout of the routers and hosts can show vulnerabilities or show the attacker where things are , Nmap is a famous tool that can be used to map networks and scan ports, its a CLI tool but it also have a GUI version called Zenmap, miter ID T1046.
+An attacker needs to understand the network topology they're working with — router and host layout can reveal vulnerabilities or show exactly where things are. Nmap is the standard tool for mapping networks and scanning ports. It's CLI-based, but also has a GUI front end called Zenmap. **MITRE ID: T1046.**
 
-### Sweeping:
+### Sweeping
 
-a common initial step in network mapping is to sweep through the network, it sends a packet to each address and waits for a respond ,to know if the address is used or not. it sends 4 packets  ICMP Echo Request, TCP SYN to port 443, TCP ACK to port 80 (if Nmap is running with UID 0), and an ICMP Timestamp request. If Nmap is not root , it only sends a TCP SYN to port 80 and to port 443 (as non-root, Nmap cannot craft the ACK packet sent to port 80).
+A common first step in network mapping is sweeping the address space — sending a packet to every address and waiting for a response to determine if it's in use. As root, Nmap sends four probe types per host: ICMP Echo Request, TCP SYN to port 443, TCP ACK to port 80, and an ICMP Timestamp request. Without root privileges, Nmap can only send a TCP SYN to ports 80 and 443 (it can't craft the raw ACK packet without elevated privileges).
 
-**Host Discovery:**`sudo nmap -sn 192.168.1.1-254` this command scan the given range for hosts , we can add the  `-pn` to disable port scanning. 
+**Host Discovery:**
 
-### IP Header:
+```bash title="Host discovery sweep with Nmap"
+sudo nmap -sn 192.168.1.1-254
+```
 
-areas associated with mapping . The source and destination IP address , the Time to Live(TTL) field for IPv4 and the Hop Limit field for IPv6.
+Add `-Pn` to skip the host-discovery phase entirely and treat all hosts as online.
+
+### IP Header
+
+Two fields matter most for mapping: the source/destination IP addresses, and the Time to Live (TTL) field in IPv4 (Hop Limit in IPv6).
 
 ![image.png](./Sec_504_book2/image_1.png)
 
-the TTL and HOPs indicates how many hops a packet can go across a network before dropping , we can use `tracert 
-traceroute` commands to see it. 
+TTL/Hop Limit determines how many hops a packet can traverse before being dropped. You can observe this directly with `tracert` (Windows) or `traceroute` (Linux).
 
-### Traceroute:
+### Traceroute
 
-when a router receives a packet it first check the TTL value and decrease it by 1 and forward it out, if its zero it sends a Time Exceeded message to the originator of the incoming packet, its use to get parts of the network that interconnected , by sending a series of packets with different  TTL values  by doing this you’ll eventually get all the devices in the network. Ex. `sudo nmap -sn --traceroute 216.239.191.182-200 -oA insecure-net`  the `-sn` disable port scanning , `--traceroute` request each path to all discovers hosts `-oA` will record the scan results. once Nmap is done we can use the Zenmap GUI to get a look at the network graphically.
+When a router receives a packet, it checks the TTL, decrements it by 1, and forwards it on. If the TTL hits zero, the router sends a "Time Exceeded" message back to the originator. Traceroute exploits this by sending a series of packets with incrementing TTL values, eventually mapping every hop between source and destination.
 
-### Port Scanning:
+Example:
 
-port are like open windows the attacker can use to access your system , port scanning are a must for attackers as it gives possible openings for the system. miter ID T1046 , there are 6556 ports for UDP and the same number for TCP , each port is a service , and there is nothing called port 0 even if its have packets will be dropped.
+```bash title="Traceroute mapping with Nmap"
+sudo nmap -sn --traceroute 216.239.191.182-200 -oA insecure-net
+```
 
-### TCP Three-Way Handshake:
+`-sn` disables port scanning, `--traceroute` requests the path to each discovered host, and `-oA` saves the results in all output formats. Once Nmap finishes, you can load the results into Zenmap for a graphical view of the network.
 
-a legit TCP connection is established by this handshake.
+### Port Scanning
+
+Ports are like open windows an attacker can use to get into your system, so port scanning is a core recon step. **MITRE ID: T1046.** There are 65536 ports each for TCP and UDP (0–65535); port 0 is reserved and any traffic to it is dropped.
+
+### TCP Three-Way Handshake
+
+A legitimate TCP connection is established through this handshake:
 
 ![image.png](./Sec_504_book2/f009cda3-ee2d-4bed-96fc-0b266d805a64.png)
 
-Six control bits describe the packet's role in the connection:
+Six control bits describe a packet's role in the connection:
 
-SYN: Synchronize, ACK: Acknowledgment, FIN: End a connection, RESET: Tear down a connection, URG: Urgent data is included, PUSH: Data should be pushed through the TCP stack.
+- **SYN** — Synchronize
+- **ACK** — Acknowledgment
+- **FIN** — End a connection
+- **RST** — Tear down a connection
+- **URG** — Urgent data is included
+- **PSH** — Data should be pushed through the TCP stack
 
-### Scan Types:
+### Scan Types
 
-Ping sweeps: Send a variety of packet types.
+- **Ping sweeps** — send a variety of probe packet types to identify live hosts.
+- **ARP scans** — identify hosts on the same LAN as the scanning machine.
+- **Connect scans** — complete the full three-way handshake. Slow and easily detected, since the entire handshake completes for every port scanned.
+- **SYN scans** — send only the initial SYN and wait for SYN-ACK; the final ACK is never sent. Faster and stealthier, since most hosts only log fully completed connections.
+- **UDP scanning** — locates vulnerable UDP services. For most UDP ports, Nmap sends an empty payload.
+- **Version scanning** — attempts to fingerprint the version of the service listening on a discovered port (TCP or UDP).
+- **IPv6 scanning** — iterates through IPv6 address ranges, invoked with `-6`.
 
-ARP scans: Identify which hosts are on the same LAN as the machine running Nmap. 
+```bash title="Full port and OS detection scan"
+sudo nmap -sS 192.168.1.10 -O -oA target-host
+```
 
-Connect scans: Complete the three-way handshake; are slow and easily detected. Because the entire handshake is completed for each port in the scan.
+This returns all open ports along with the services and OS running on the target.
 
-SYN scans: Only send the initial SYN and await the SYN-ACK response to determine if a port is open. The final ACK packet from the attacker is never sent. The result is an increase in performance and a much stealthier scan. host only log completed a connection.
+### NSE Scripts
 
-UDP scanning: Helps locate vulnerable UDP services. For most UDP ports, Nmap sends packets with an empty payload.
-
-Version scanning: Tries to determine the version number of the program listening on a discovered port for both TCP and UDP.
-
-IPv6 scanning: Iterates through a series of IPv6 addresses, scanning for target systems and ports, invoked with the -6 syntax.
-
- `sudo nmap -sS 192.168.1.10 -O -oA target-host`  this command will return all open ports and the serves running on them 
-
-### NSE Scripts:
-
-nmap have the Nmap Scripting Engine (NSE) which provide scripts that can be used , `-sC` will use the default scripts.
+:::tip
+Nmap's Scripting Engine (NSE) ships with a huge library of scripts for everything from vuln detection to enumeration. The `-sC` flag runs the default script set.
+:::
 
 ![image.png](./Sec_504_book2/image_2.png)
 
 ![image.png](./Sec_504_book2/503cf747-9d5f-4227-bc18-563559306ac9.png)
 
-## Cloud Spotlight: Cloud Scanning:
+## Cloud Spotlight: Cloud Scanning
 
-scanning a cloud server seems to be undoable but , attackers cant take this word they found ways to do it , which will be explained later , attacker can do all they want withe a cloud network because its mostly not monitored some time you can pass firewalls if your attacking a cloud system from the same provider, miter ID T1046
+Scanning a cloud environment seems like it should be impossible, but attackers have found ways around it — explained below. An attacker operating from within the same cloud provider can sometimes bypass firewalls entirely, and cloud environments tend to be far less monitored than traditional on-prem networks. **MITRE ID: T1046.**
 
-### JQ and JSON:
+### JQ and JSON
 
-whenever you dealing with cloud systems your dealing with JSON as its used by all cloud providers in various tasks , and the best tool to deal with it is the JSON Query tool, JQ its a light weight tool and parsing language  , which is great when dealing with JSON.
+Working with cloud platforms almost always means working with JSON, since every major cloud provider uses it extensively. [jq](https://jqlang.github.io/jq/) is a lightweight command-line JSON processor and query language, and it's essential for this kind of work.
 
-### Cloud Scanning:
+### Cloud Scanning
 
-scanning is just one technique attacker can use to identify assets, we can use osint DNS info and so on to get their hands to that sweet info , [BuiltWith.com](http://BuiltWith.com)  is a site that can show you some info you’ll need and that will help you as an attacker it can help you to get the cloud provider for the target.
+Scanning is just one technique for identifying cloud assets — OSINT and DNS recon can also surface useful info.
 
-### Exhaustive IP Address Enumeration:
+:::tip
+[BuiltWith.com](http://BuiltWith.com) can identify a target's cloud provider, which is often the first piece of info an attacker needs for this approach.
+:::
 
-once the attacker get you cloud provider he can get the list of Ip associated with this provider which the targets Ip is include in it.
+### Exhaustive IP Address Enumeration
 
-using this query will give a list of all the iP’s associated with each of this 3 cloud providers 
+Once an attacker identifies the cloud provider, they can pull the full list of IP ranges associated with that provider — which will include the target's IP somewhere in that range.
 
 ![image.png](./Sec_504_book2/ba4b6e41-ff6a-455a-9177-031260be9a01.png)
 
-### Masscan:
+### Masscan
 
-when dealing with this much  iP’s Nmap become insufficient , as its slow and will take ages to do this task , instead w will use masscan Nmap sends the SYN then wait for the ACK to get back , masscan docent do this it sends all the SYN then anther part handles receiving the ACK, making port scanning much faster, `wget -qO- https://ip-ranges.amazonaws.com/ip-ranges.json | jq '.prefixes[] | if .region == "us-east-1" then .ip_prefix else empty end' -r | sort -u > us-east-1-range.txt` using a query like this we gat all the ip’s from AWS we can then filter it down to only get the us east1 region and save it to a file, `sudo masscan -iL us-east-1-range.txt -oL us-east-1-range.masscan -p 443 -rate 100000` here we will use this file and only scan TCP port 443 with a rate of 100k requests per second using this we can scan 33 million Ip address in just 5.5 hours , though at this rate this may cause false negatives , lowering this rate will increase the positives.
+When dealing with IP ranges this large, Nmap becomes impractical — it's too slow for the task. Masscan solves this differently: instead of Nmap's send-SYN-then-wait-for-ACK approach, masscan fires all SYN packets up front and handles incoming ACKs in a separate process, making port scanning dramatically faster.
 
-**Attributing Hosts:** from this result we now have a list of ip‘s with open port 443 we now can abuse teh TLS certificate to get some data , `openssl s_client -connect 18.207.73.1:443 2>/dev/null | openssl x509 -text | grep Subject:` this command will get all the SSL info in the subject line , but **openssl** can only connect to one server at a time, that why we’ll use **TLS-Scan**  this tool reads from a list op Ip’s extracts certificate information , from multiple ports  `cat us-east-1-range.tlsopen | tls-scan --port=443 --cacert=ca-bundle.crt -o us-east-1-range-tlsinfo.json` , this command reads the ip list then using the certificate list we have we get all the info and save it in the JSON file tls-scan is fast and non-blocking but it’ll take some time. we then need to pars the data using some JQ
+Pull all AWS IP ranges for the us-east-1 region:
 
-### EyeWitness:
+```bash title="Pull AWS us-east-1 IP ranges"
+wget -qO- https://ip-ranges.amazonaws.com/ip-ranges.json | jq '.prefixes[] | if .region == "us-east-1" then .ip_prefix else empty end' -r | sort -u > us-east-1-range.txt
+```
 
-anther tool we can use , this tool will help us with recon as it takes screenshots from sites detect and identify the purpose of it , get you default pages and management pages , return indexed directories , and even some identify default credentials in some apps, to use it we feed it data from masscanand TLS-scan URL’s, `python3 /opt/eyewitness/EyeWitness.py --web -f urllist.txt --prepend-https` then using this command the magic happens.
+Scan port 443 across that entire range:
 
-### Defense:
+```bash title="Mass port scan with masscan"
+sudo masscan -iL us-east-1-range.txt -oL us-east-1-range.masscan -p 443 -rate 100000
+```
 
-we as defenders cant log and look at every step mentioned earlier, so the best thing we can do is to limit access to the servers like the API server should only be accusable through the app firewall,  not to the public, most of the time we can do anything about scanning but we can deal with what come afterwards so keep your eyes on the logs. 
+At 100k packets/second, this can scan roughly 33 million IPs in about 5.5 hours.
+
+:::caution
+Running masscan at very high rates increases false negatives. Lowering the rate improves accuracy at the cost of scan time — there's a real tradeoff here, not a free lunch.
+:::
+
+**Attributing Hosts:** From the scan results, you have a list of IPs with port 443 open. You can now pull TLS certificate data to glean more info about each host:
+
+```bash title="Pull certificate subject with openssl"
+openssl s_client -connect 18.207.73.1:443 2>/dev/null | openssl x509 -text | grep Subject:
+```
+
+This pulls the Subject line from the certificate, but `openssl` only connects to one server at a time. For bulk work, use **TLS-Scan** instead, which reads a list of IPs and extracts certificate info across multiple hosts and ports:
+
+```bash title="Bulk TLS certificate enumeration with TLS-Scan"
+cat us-east-1-range.tlsopen | tls-scan --port=443 --cacert=ca-bundle.crt -o us-east-1-range-tlsinfo.json
+```
+
+This reads the IP list, pulls certificate info for each, and saves it to a JSON file. TLS-Scan is fast and non-blocking, but bulk scans still take time. From there, `jq` is your friend for parsing the resulting JSON.
+
+### EyeWitness
+
+:::tip
+EyeWitness takes screenshots of target sites and helps identify their purpose — default pages, management interfaces, exposed directory listings, and in some cases even default credentials. Feed it URLs derived from your masscan/TLS-scan results:
+:::
+
+```bash title="Run EyeWitness against a URL list"
+python3 /opt/eyewitness/EyeWitness.py --web -f urllist.txt --prepend-https
+```
+
+### Defense
+
+As defenders, we can't realistically log and monitor every step of this chain. The best approach is to limit exposure — e.g., API servers should only be reachable through an application firewall, never directly from the public internet. Most of the time you won't catch the scanning itself, but you can control what happens afterward, so keep close watch on your logs.
 
 ![image.png](./Sec_504_book2/image_3.png)
 
-## SMB Sessions:
+## SMB Sessions
 
-Microsoft Server Message Block (SMB) , used to make network accessibility to windows machines , features like file explorer net use reg , and soo on basically you control main functionality's, that way its targeted by attackers , its used on TCP port 445 , and some older versions use TCP and UDP ports 135 to 139, MITER ID T1135 ,T11077,T1110.
+Server Message Block (SMB) provides network access to Windows machines — file sharing, `net use`, registry access, and more. Because it controls so much core functionality, it's a high-value target for attackers. SMB runs on TCP port 445, while older versions also use TCP/UDP ports 135–139. **MITRE ID: T1135, T1077, T1110.**
 
-### Establishing an SMB Session from Windows:
+### Establishing an SMB Session from Windows
 
-using the `net use \\targetip` command because we did not provide a suer name it will use the name of who ran this command , same with the share name, or we can use this `net use \\targetip\sharename password /u:username` you don't have to be an admit to connect to anther device.
+```bash title="Establish an SMB session (implicit credentials)"
+net use \\targetip
+```
 
-### Interrogating Targets:
+Without specifying a username, this uses the credentials of whoever ran the command. You can also specify credentials and a share explicitly:
 
-after connecting to a target using `net use \\targetip` we can just use the `net view \\targetip` command to get a list of all users in this machine but not the default admins. 
+```bash title="Establish an SMB session with explicit credentials"
+net use \\targetip\sharename password /u:username
+```
 
-**Password Guessing:**  `net user /domain > users.txt` here we just get a list of all the users , then we can create a word list to save out password at just make sure the number of password is less than the account lockout threshold so u don't get yourself kicked, finally using the command  `@FOR /F %p in (pass.txt) DO @FOR /F %n in (users.txt) DO @net use \\SERVERIP\IPC$ /user:DOMAIN\%n %p 1>NUL 2>&1 && @echo [*] %n:%p && @net use /delete \\SERVERIP\IPC$ > NUL` we will loop on each user name test the passwords and if its correct it will be echoed in the consol. YES its that easy and yeas attacker do it, and also it bypasses most  IPS/IDS.
+You don't need admin rights to connect to another device over SMB.
 
-### SharpView:
+### Interrogating Targets
 
-an enumeration tool it collects data about a windows device using a non amin account, command like `Get-DomainUser , Get-DomainGroup , Get-NetComputer` , all of them can get you  a lot of data for EX the `Get-NetComputer` return the machine name operating system version , and name and more.  `sharpview Get-DomainUser -Domain sec504.org -Credential ksmith/Password123 -Server 192.168.99.10 | findstr "^name"` this command get all the users in a domain.
+After connecting with `net use \\targetip`, run:
 
-### BloodHound:
+```bash title="Enumerate shares on a target"
+net view \\targetip
+```
 
-another tool that maps relations premotions users of systems graphicly , which can help the attacker to know the best course of action go get the domain admin account.
+This lists available shares (not the default admin shares).
 
-### Establishing SMB Sessions from Linux:
+**Password Guessing:**
 
-you can also attack a windows system from a Linux , using the `smbclient` command , but here you may need to specify the SMB version , `mbclient -L //192.168.99.10 -U ksmith -m SMB2` this command will show you all the share name , you can also have an interactive connection to a machine `smbclient //192.168.99.10/accounting$ -U ksmith -m SMB2` with this command we can do things like`ls, cd, get, post` and so on a computer. Anther command we can use is `rpcclient -U username server` , which can make us also actively interact withe a systems after you enter the password, with commands like `enumdomusers`  list users, `enumalsgroupsd omain|builtin`  List groups (enum alias group), `lsaenumsid`  Show all users SIDs defined, `lookupnames`  see the SID for a username that you provide, `lookupsids`Show username associated with SID, `srvinfo` Show OS type and version.
+```bash title="Dump domain users"
+net user /domain > users.txt
+```
 
-### Seeing and Dropping SMB Sessions:
+This dumps a list of domain users. Build a password wordlist and pair it against the usernames.
 
-to see the session you made`net use` , you can select and drop a session using `net use \\[IPaddr] /del`
-ort drop all using `net use * /del` , on the other hand to see all inbound session use `net session` , to drop one sue `net session \\[IPaddr] /del` , the ability to drop a session can become in handy when you in an incident because you can disconnect the attacker temporarily. buying you some more time.
+:::caution
+Keep your guess count below the account lockout threshold, or you'll lock out the accounts you're testing — and tip off the defenders.
+:::
 
-### SMB versions:
+```bash title="Password spray against SMB with nested FOR loops"
+@FOR /F %p in (pass.txt) DO @FOR /F %n in (users.txt) DO @net use \\SERVERIP\IPC$ /user:DOMAIN\%n %p 1>NUL 2>&1 && @echo [*] %n:%p && @net use /delete \\SERVERIP\IPC$ > NUL
+```
 
-older versions are still used till this day which  we should block and can by using this command `Disable-WindowsOptionalFeature -Online -FeatureName smb1protocol`
+This loops through every username/password combination and echoes any successful hit to the console. It's that simple — and yes, real attackers use exactly this technique, partly because it tends to slip past most IPS/IDS solutions.
+
+### SharpView
+
+:::tip
+SharpView is an enumeration tool that collects data about a Windows environment using a non-admin account. Useful commands include `Get-DomainUser`, `Get-DomainGroup`, and `Get-NetComputer` — the latter returns machine names, OS versions, and more.
+:::
+
+```bash title="Enumerate domain users with SharpView"
+sharpview Get-DomainUser -Domain sec504.org -Credential ksmith/Password123 -Server 192.168.99.10 | findstr "^name"
+```
+
+This pulls all usernames in a domain.
+
+### BloodHound
+
+Another graph-based enumeration tool that maps relationships between users, groups, and systems — helping an attacker chart the shortest path to Domain Admin.
+
+### Establishing SMB Sessions from Linux
+
+You can attack a Windows system from Linux too, using `smbclient`. You may need to specify the SMB version explicitly:
+
+```bash title="List shares with smbclient"
+smbclient -L //192.168.99.10 -U ksmith -m SMB2
+```
+
+This lists available shares. For an interactive session:
+
+```bash title="Interactive SMB session with smbclient"
+smbclient //192.168.99.10/accounting$ -U ksmith -m SMB2
+```
+
+From here you get an interactive shell with commands like `ls`, `cd`, `get`, and `put`.
+
+Another option is `rpcclient`:
+
+```bash title="Connect with rpcclient"
+rpcclient -U username server
+```
+
+This gives you an interactive session after authentication, with commands including:
+
+- `enumdomusers` — list users
+- `enumalsgroups domain|builtin` — list alias groups
+- `lsaenumsid` — show all defined user SIDs
+- `lookupnames` — get the SID for a given username
+- `lookupsids` — get the username associated with a SID
+- `srvinfo` — show OS type and version
+
+### Seeing and Dropping SMB Sessions
+
+View active outbound sessions:
+
+```bash title="View active outbound SMB sessions"
+net use
+```
+
+Drop a specific session:
+
+```bash title="Drop a specific outbound session"
+net use \\[IPaddr] /del
+```
+
+Drop all sessions:
+
+```bash title="Drop all outbound sessions"
+net use * /del
+```
+
+View inbound sessions:
+
+```bash title="View inbound SMB sessions"
+net session
+```
+
+Drop a specific inbound session:
+
+```bash title="Drop a specific inbound session"
+net session \\[IPaddr] /del
+```
+
+:::tip
+The ability to drop a session is genuinely useful during an active incident — it can disconnect an attacker temporarily, buying you time to respond.
+:::
+
+### SMB Versions
+
+Older SMB versions are still in use today and should be disabled wherever possible:
+
+```bash title="Disable SMBv1 on Windows"
+Disable-WindowsOptionalFeature -Online -FeatureName smb1protocol
+```
 
 ![image.png](./Sec_504_book2/image_4.png)
 
-### Defending:
+### Defending
 
-you should only allow SMB in specific servers like file servers or domain controller , config to block TCP port 445 and UPD/TCP 135-139 , also you can setup some PVLANs.
+Restrict SMB to specific servers — file servers and domain controllers — and block TCP 445 plus UDP/TCP 135–139 everywhere else. Consider segmenting with PVLANs as an additional layer.
 
 ![image.png](./Sec_504_book2/beae487b-8b5f-44f9-8143-406edcba7d81.png)
 
-## DeepBlueCLI:
+## DeepBlueCLI
 
-is a PowerShell script written by the one and only Eric Conrad, it parses windows event logs, it can make mistackes is a usful analysis tool not a perfect one, in dose not need any configrations it detects attacks from famouus attack frame works and show you the results using the logs, it can analysis data on a l;ive system or a reamot copnected , or ofline log files, 
+:::important
+DeepBlueCLI, written by Eric Conrad, is a PowerShell script that parses Windows event logs and flags activity matching known attack frameworks. It can produce false positives — it's a useful analysis aid, not a perfect detector — but it works against live systems, remote systems, or offline log files.
+:::
 
- 
-this example shows an how the output looks like and even getting some artifact like the targeted username, and the attacking device name.
+The example below shows typical output, including extracted artifacts like the targeted username and the attacking device's name.
 
 ![image.png](./Sec_504_book2/image_5.png)
 
-output formatting: as a PowerShell tool we can us ethe normal power shell commands wit it formatting the output in csv xml and any other format supported by PowerShell.
+**Output formatting:** since it's a PowerShell tool, you can pipe its output through standard PowerShell formatting cmdlets to export as CSV, XML, or any other supported format.
 
 ![image.png](./Sec_504_book2/image_6.png)
 

