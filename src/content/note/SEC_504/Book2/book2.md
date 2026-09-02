@@ -3,12 +3,14 @@ title: "Sec 504 book2"
 description: "My personal SOC notes on Sec 504 book2."
 publishDate: "2026-04-26T00:00:00Z"
 tags: ["sans504"]
-slug: "sec-504/sans504/sec-504-book2"
+slug: "sec-504/book2"
+hidden: true
+
 ---
 
 In order to defend, we first need to understand how hackers move and operate. This book covers attack concepts — we examine attacker tools, techniques, and procedures (TTPs) so we can defend better.
 
-![anonymous-anonymous-bites-back.gif](./Sec_504_book2/anonymous-anonymous-bites-back.gif)
+![anonymous-anonymous-bites-back.gif](./images/anonymous-anonymous-bites-back.gif)
 
 ## MITRE ATT&CK Framework
 
@@ -69,7 +71,7 @@ SpiderFoot is an open-source OSINT data collection and analysis tool. It pulls d
 
 OSINT means collecting data from public sites and third parties. The moment you interact directly with the target, you've crossed out of OSINT territory.
 
-![image.png](./Sec_504_book2/image.png)
+![image.png](./images/image.png)
 
 ## DNS Interrogation
 
@@ -122,7 +124,7 @@ To defend against DNS recon:
 It's easy to confuse legitimate DNS traffic with an attack, so be cautious before taking action on what looks suspicious. The right move is to report the IP to your threat intel team and add it to a watch list until you're confident it's malicious.
 :::
 
-![image.png](./Sec_504_book2/c5fa4d05-703f-46ec-ab63-c979864882d8.png)
+![image.png](./images/c5fa4d05-703f-46ec-ab63-c979864882d8.png)
 
 ## Website Reconnaissance
 
@@ -156,7 +158,7 @@ The U.S. Securities and Exchange Commission (SEC) is a useful source when resear
 
 Periodically check your own OSINT footprint to make sure nothing's leaked. You can add a `robots.txt` to block certain URLs from search indexing — but be careful: anyone can simply view `robots.txt` directly and see exactly what you're trying to hide via `Disallow` entries. Keep an eye on your logs, since they'll often flag suspicious activity before it escalates.
 
-![image.png](./Sec_504_book2/0cd128b4-9d5c-4f72-9e09-0acf951a78d2.png)
+![image.png](./images/0cd128b4-9d5c-4f72-9e09-0acf951a78d2.png)
 
 ## Network and Host Scanning with Nmap
 
@@ -178,7 +180,7 @@ Add `-Pn` to skip the host-discovery phase entirely and treat all hosts as onlin
 
 Two fields matter most for mapping: the source/destination IP addresses, and the Time to Live (TTL) field in IPv4 (Hop Limit in IPv6).
 
-![image.png](./Sec_504_book2/image_1.png)
+![image.png](./images/image_1.png)
 
 TTL/Hop Limit determines how many hops a packet can traverse before being dropped. You can observe this directly with `tracert` (Windows) or `traceroute` (Linux).
 
@@ -202,7 +204,7 @@ Ports are like open windows an attacker can use to get into your system, so port
 
 A legitimate TCP connection is established through this handshake:
 
-![image.png](./Sec_504_book2/f009cda3-ee2d-4bed-96fc-0b266d805a64.png)
+![image.png](./images/f009cda3-ee2d-4bed-96fc-0b266d805a64.png)
 
 Six control bits describe a packet's role in the connection:
 
@@ -235,9 +237,9 @@ This returns all open ports along with the services and OS running on the target
 Nmap's Scripting Engine (NSE) ships with a huge library of scripts for everything from vuln detection to enumeration. The `-sC` flag runs the default script set.
 :::
 
-![image.png](./Sec_504_book2/image_2.png)
+![image.png](./images/image_2.png)
 
-![image.png](./Sec_504_book2/503cf747-9d5f-4227-bc18-563559306ac9.png)
+![image.png](./images/503cf747-9d5f-4227-bc18-563559306ac9.png)
 
 ## Cloud Spotlight: Cloud Scanning
 
@@ -259,7 +261,7 @@ Scanning is just one technique for identifying cloud assets — OSINT and DNS re
 
 Once an attacker identifies the cloud provider, they can pull the full list of IP ranges associated with that provider — which will include the target's IP somewhere in that range.
 
-![image.png](./Sec_504_book2/ba4b6e41-ff6a-455a-9177-031260be9a01.png)
+![image.png](./images/ba4b6e41-ff6a-455a-9177-031260be9a01.png)
 
 ### Masscan
 
@@ -311,7 +313,7 @@ python3 /opt/eyewitness/EyeWitness.py --web -f urllist.txt --prepend-https
 
 As defenders, we can't realistically log and monitor every step of this chain. The best approach is to limit exposure — e.g., API servers should only be reachable through an application firewall, never directly from the public internet. Most of the time you won't catch the scanning itself, but you can control what happens afterward, so keep close watch on your logs.
 
-![image.png](./Sec_504_book2/image_3.png)
+![image.png](./images/image_3.png)
 
 ## SMB Sessions
 
@@ -450,13 +452,13 @@ Older SMB versions are still in use today and should be disabled wherever possib
 Disable-WindowsOptionalFeature -Online -FeatureName smb1protocol
 ```
 
-![image.png](./Sec_504_book2/image_4.png)
+![image.png](./images/image_4.png)
 
 ### Defending
 
 Restrict SMB to specific servers — file servers and domain controllers — and block TCP 445 plus UDP/TCP 135–139 everywhere else. Consider segmenting with PVLANs as an additional layer.
 
-![image.png](./Sec_504_book2/beae487b-8b5f-44f9-8143-406edcba7d81.png)
+![image.png](./images/beae487b-8b5f-44f9-8143-406edcba7d81.png)
 
 ## DeepBlueCLI
 
@@ -466,10 +468,10 @@ DeepBlueCLI, written by Eric Conrad, is a PowerShell script that parses Windows 
 
 The example below shows typical output, including extracted artifacts like the targeted username and the attacking device's name.
 
-![image.png](./Sec_504_book2/image_5.png)
+![image.png](./images/image_5.png)
 
 **Output formatting:** since it's a PowerShell tool, you can pipe its output through standard PowerShell formatting cmdlets to export as CSV, XML, or any other supported format.
 
-![image.png](./Sec_504_book2/image_6.png)
+![image.png](./images/image_6.png)
 
 **الحمد لله done**

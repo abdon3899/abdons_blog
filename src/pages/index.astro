@@ -24,13 +24,15 @@ const pinnedPosts = allPostsByDate
 // Notes, set to a max of 5
 const MAX_NOTES = 5;
 const allNotes = await getCollection("note");
-// Filter to only top-level notes with subpages
+// Filter to only top-level notes with any subfolders, excluding hidden notes
 const filteredNotes = allNotes.filter((note) => {
 	const parts = note.id.split("/");
 	if (parts.length !== 2) return false;
+	if (note.data.hidden) return false;
 
-	// Check if there is a subfolder with the same name
-	return allNotes.some((subNote) => subNote.id.startsWith(`${note.id.replace(".md", "/")}/`));
+	// Check if there is any subfolder under this note
+	const noteFolderPrefix = note.id.replace(".md", "/");
+	return allNotes.some((subNote) => subNote.id.startsWith(noteFolderPrefix));
 });
 const latestNotes = filteredNotes
 	.sort(collectionDateSort)

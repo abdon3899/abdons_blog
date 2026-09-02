@@ -47,6 +47,7 @@ const note = defineCollection({
             .transform((val) => new Date(val)),
         coverImage: image().optional(),
         slug: z.string().optional(),
+        hidden: z.boolean().default(false),
     }),
 });
 

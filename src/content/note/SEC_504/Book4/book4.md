@@ -3,12 +3,13 @@ title: "Sec 504 book4"
 description: "My personal SOC notes on Sec 504 book4."
 publishDate: "2026-04-26T00:00:00Z"
 tags: ["sans504"]
-slug: "sec-504/sans504/sec-504-book4"
+slug: "sec-504/book4"
+hidden: true
 ---
 
 Here we start getting deeper into the tools and attacks used to compromise targets. Heads up, and keep your eyes open to spot these attacks at first sight.
 
-![sniper-pubg.gif](./Sec_504_book4/sniper-pubg.gif)
+![sniper-pubg.gif](./images/sniper-pubg.gif)
 
 ## Metasploit
 
@@ -42,7 +43,7 @@ Meterpreter's core feature set covers displaying system info, interacting with t
 
 Keep systems patched — never get lazy about it. Threat intel feeds should keep you aware of currently active threats. Use host-based detection and response (EDR), along with application allowlisting software that only permits approved apps to run. On Linux, deploy SELinux-enabled distributions. Filter all incoming and outgoing traffic and watch for outliers: unusually long domain names, unrecognized DNS data, and suspicious IP connections.
 
-![image.png](./Sec_504_book4/image.png)
+![image.png](./images/image.png)
 
 ## Drive-By Attacks
 
@@ -78,7 +79,7 @@ After compromising a website, attackers swap the legitimate installer binary for
 BeEF is a toolkit purpose-built for attacking browsers, leveraging cross-site scripting as its primary delivery mechanism. Among its capabilities are social-engineering attacks — fake Google login prompts, fake update notices, and more. The default BeEF server listens on TCP/3000, and it ships with a wide range of post-exploitation modules.
 :::
 
-![image.png](./Sec_504_book4/image_1.png)
+![image.png](./images/image_1.png)
 
 ### Building Payloads
 
@@ -98,7 +99,7 @@ The `-x` parameter lets you specify a template executable, so instead of just ge
 
 One of the strongest protections is an application allowlist, which prevents users from running unapproved software and gives the security team a clear baseline to work from. Pair this with rapid patching to keep systems ahead of known exploits. From a preparation standpoint, monitor attack trends and threat intel feeds, and invest in log monitoring along with User and Entity Behavior Analytics (UEBA), which learns normal user behavior and automatically alerts on anomalies.
 
-![image.png](./Sec_504_book4/image_2.png)
+![image.png](./images/image_2.png)
 
 ## System Resource Usage Monitor (SRUM)
 
@@ -112,9 +113,9 @@ SRUM-Dump reads from `SRUDB.dat` and the relevant registry hive, extracting the 
 
 The Excel output is clean and well organized, with separate tabs for each data category, making it easy to reconstruct how a user has been using the device over the retention window — and to spot signs of an attack.
 
-![image.png](./Sec_504_book4/image_3.png)
+![image.png](./images/image_3.png)
 
-![image.png](./Sec_504_book4/image_4.png)
+![image.png](./images/image_4.png)
 
 ## Command Injection
 
@@ -126,7 +127,7 @@ When testing for this vulnerability, try a range of input combinations and comma
 There's also a blind variant where the server returns no visible output regardless of what you inject. Try `ping -n 6 -w 1000 127.0.0.1` — you won't see the ping output directly, but you'll notice the response takes roughly 5 extra seconds. Alternatively, ping your own IP and watch for the resulting ICMP packets on your end to confirm execution.
 :::
 
-![image.png](./Sec_504_book4/image_5.png)
+![image.png](./images/image_5.png)
 
 ### Example
 
@@ -139,7 +140,7 @@ system("composite csfooter.png " . $uploadfile . " " . $fbrandfile);
 
 Since the image filename is built directly from user-supplied name fields and passed to `system()`, an attacker can inject a command through those fields and have it executed.
 
-![image.png](./Sec_504_book4/image_6.png)
+![image.png](./images/image_6.png)
 
 ### Not Just Web Apps
 
@@ -149,7 +150,7 @@ Command injection isn't limited to web applications. Hardware running a CLI may 
 
 The best defense is educating developers that user input is an attack surface that demands careful handling, paired with regular penetration testing. Monitor web server traffic for anomalies — it's not normal for a server to ping arbitrary hosts or make outbound connections, so watch the protocols in use (SMB, for instance) for anything unexpected. For containment, take the affected service offline if remediation is going to take time, or front it with a WAF in the interim.
 
-![image.png](./Sec_504_book4/image_7.png)
+![image.png](./images/image_7.png)
 
 ## Cross-Site Scripting (XSS)
 
@@ -208,7 +209,7 @@ Filter all user input — every potentially dangerous character should be handle
 
 A WAF (e.g., ModSecurity for Apache, IIS, and Nginx) doesn't fix the underlying flaw, but provides a useful compensating control. Output validation adds a second filtering layer on top of input validation. Configure the server to set the `HttpOnly` flag on cookies — this doesn't restrict delivery over HTTP, but does make the cookie inaccessible to JavaScript running in the browser (note this can break apps that legitimately need JS to read cookies). A Content Security Policy (CSP) header is another strong layer: it's a set of server-issued instructions telling the browser exactly which content sources are trustworthy.
 
-![image.png](./Sec_504_book4/image_8.png)
+![image.png](./images/image_8.png)
 
 ## SQL Injection
 
@@ -240,7 +241,7 @@ Testing for SQL injection follows a similar pattern to XSS — manipulate input 
 The presence of escaped quote characters in the error output shows the server is attempting to sanitize unsafe characters — a PHP technique that complicates, but doesn't fully prevent, SQL injection.
 :::
 
-![image.png](./Sec_504_book4/image_9.png)
+![image.png](./images/image_9.png)
 
 ### SQL UNION Statement
 
@@ -317,7 +318,7 @@ Always take a full backup of the target database before running SQL injection te
 
 The most basic defense is never granting the web application's database account admin permissions — this won't prevent SQL injection outright, but it sharply limits what an attacker can do once they find a flaw. Filter all input that could be used to construct injected queries, and prefer parameterized queries over string concatenation everywhere. Enable database logging for failed statements and syntax errors, which helps you spot active attacks. Finally, a WAF module like ModSecurity for Apache, IIS, or Nginx adds filtering specifically tuned to catch both SQL injection and XSS attempts.
 
-![image.png](./Sec_504_book4/image_10.png)
+![image.png](./images/image_10.png)
 
 ## Cloud Spotlight: SSRF and IMDS
 
@@ -327,7 +328,7 @@ Here we look at Server-Side Request Forgery (SSRF) as applied against cloud Inst
 
 There are two patterns for fetching a remote asset. In the first, the client sends a GET request for, say, `/img=alien.png`; the server parses it and returns HTML instructing the browser to fetch `https://server2/alien.png` directly. The browser then makes a second request of its own to retrieve the image. Here the server only hands back a reference — the client makes the follow-up request.
 
-![image.png](./Sec_504_book4/image_11.png)
+![image.png](./images/image_11.png)
 
 The second pattern is when the server itself fetches the asset on the client's behalf — a true server-side request. For the same `/img=alien.png` request, instead of returning a reference, the server fetches the asset from `server2` directly and relays the photo back to the client. This server-side fetch pattern is less common, and if the server doesn't validate the target of that fetch, it's exposed to SSRF.
 
@@ -335,15 +336,15 @@ The second pattern is when the server itself fetches the asset on the client's b
 
 Here's how this gets abused: instead of a relative path like `/img=alien.png`, suppose the parameter takes a full URL — `https://server2/me.jpg`. What happens if we change it to `file:///etc/shadow`? The server still performs its server-side fetch as designed, but now it reads `/etc/shadow` from the local filesystem instead of fetching a remote image — exposing sensitive local data through what looked like an image-loading feature.
 
-![image.png](./Sec_504_book4/image_12.png)
+![image.png](./images/image_12.png)
 
 ### Example
 
 Consider a login page offering several federated login options — Facebook, X, Microsoft — where the selected provider's logo is displayed in the dialog. Inspecting the URL reveals two GET parameters, `F` and `logo`. The `logo` parameter contains a fully qualified CDN URL, meaning a URL is being passed straight through to the server — a strong signal that SSRF might be present.
 
-![image.png](./Sec_504_book4/image_13.png)
+![image.png](./images/image_13.png)
 
-![image.png](./Sec_504_book4/image_14.png)
+![image.png](./images/image_14.png)
 
 Changing the `logo` parameter to `file:///etc/hosts` and submitting just returns the same page with a broken image — not conclusive on its own. To see what's actually happening server-side, use `cURL`:
 
@@ -355,7 +356,7 @@ curl -v "https://target/login?F=microsoft&logo=file:///etc/hosts"
 The verbose output here confirms an SSRF vulnerability — the response includes the actual contents of `/etc/hosts`. SSRF generally doesn't let you list directory contents, but an attacker can still target well-known file paths they expect to exist, like `/etc/passwd` or various log files, though the server's process may not always have permission to read them.
 :::
 
-![image.png](./Sec_504_book4/image_15.png)
+![image.png](./images/image_15.png)
 
 When exploiting SSRF, attackers typically try to access protected files on the host or escalate privileges by harvesting passwords or password hashes — `/etc/shadow` being the classic target. This plays out differently in the cloud: a traditional Linux server needs `/etc/shadow` for local user authentication, but a cloud instance with no interactive logins or local user-based auth has no real need for that file at all. So if a `cURL` request against `/etc/shadow` returns a `Content-Length` of zero, that could mean the file is protected, or simply that it doesn't exist in this context — either way, it nudges the attacker toward more cloud-specific exploitation paths instead.
 
@@ -363,11 +364,11 @@ When exploiting SSRF, attackers typically try to access protected files on the h
 
 IMDS is a virtual server endpoint present on all major cloud providers, letting applications query details about their own runtime environment — resource SKU, hostname, IAM permissions, network settings, storage configuration, and more. Apps access it via a fixed local URL endpoint. In some deployments, developers store custom application data here too.
 
-![image.png](./Sec_504_book4/image_16.png)
+![image.png](./images/image_16.png)
 
 Systems can use IMDS data to make configuration decisions at boot time or on app startup, making it a powerful way to configure cloud assets without modifying the instance or VM image directly. In some cases IMDS also holds genuinely sensitive data — a database connection string, for example. Because IMDS is accessed over plain HTTP, it's a natural target once an attacker has an SSRF foothold.
 
-![image.png](./Sec_504_book4/image_17.png)
+![image.png](./images/image_17.png)
 
 ### AWS IMDSv1 Credential Exfiltration
 
@@ -375,11 +376,11 @@ Systems can use IMDS data to make configuration decisions at boot time or on app
 IMDSv1 is notorious for leaking sensitive data to attackers via SSRF — though the actual impact depends on whether the IAM role attached to the instance carries meaningful permissions. A typical chain: identify the attached role name via IMDS, use it to retrieve that role's temporary security credentials (access key ID, secret access key, and session token), then authenticate directly with the AWS CLI using those stolen credentials.
 :::
 
-![image.png](./Sec_504_book4/image_18.png)
+![image.png](./images/image_18.png)
 
 In response to this widespread issue, AWS introduced IMDSv2, which requires a special HTTP header to access IMDS at all. Since SSRF attackers typically can't control custom headers on the forged request, this single requirement is easy for legitimate apps to build in but meaningfully harder for an SSRF-driven attack to satisfy.
 
-![image.png](./Sec_504_book4/image_19.png)
+![image.png](./images/image_19.png)
 
 :::warning
 IMDSv2 enforcement isn't turned on by default, so a large share of AWS deployments remain vulnerable to IMDS data disclosure via SSRF.
@@ -393,6 +394,6 @@ In many deployments, credentials are passed through environment variables rather
 
 By now the recurring theme should be clear: validate and sanitize input, everywhere. Log requests at the web server level to help detect SSRF attempts, and enable cloud-side logging for IMDS access too. AWS CloudWatch logs, for instance, can flag unusual external use of temporary credentials — a strong signal those credentials have been compromised, and sometimes even revealing the attacker's IP address. Finally, require developers to use IMDSv2: it doesn't fully eliminate SSRF risk against IMDS, but it raises the bar significantly against basic exploitation.
 
-![image.png](./Sec_504_book4/image_20.png)
+![image.png](./images/image_20.png)
 
 **الحمد لله done**

@@ -3,7 +3,8 @@ title: "Sec 504 book3"
 description: "My personal SOC notes on Sec 504 book3."
 publishDate: "2026-04-26T00:00:00Z"
 tags: ["sans504"]
-slug: "sec-504/sans504/sec-504-book3"
+slug: "sec-504/book3"
+hidden: true
 ---
 
 A password is the ultimate prize for an attacker — it gives unconditional access and maybe even some juicy files along the way. Here we'll study how attackers get their hands on your passwords, and how you can keep them safe.
@@ -32,7 +33,7 @@ Here we improve our password guessing by factoring in context — does the compa
 
 What better way to get a password than reusing one that's already been stolen? Here the attacker works through a huge collection of leaked breach data, searching for a domain like `@sans.org` or a specific name like "joker." This can surface an organization's user passwords, or credentials belonging to a specific individual.
 
-![image.png](./Sec_504_book3/image.png)
+![image.png](./images/image.png)
 
 ## Understanding Password Hashes
 
@@ -104,7 +105,7 @@ In early UNIX, passwords were stored in `/etc/passwd` using DES. Later, hashes m
 
 `/etc/shadow` stores hashes using `$` as a field separator: the encryption algorithm identifier (1–6), the salt, and finally the hash itself.
 
-![image.png](./Sec_504_book3/image_1.png)
+![image.png](./images/image_1.png)
 
 ### Hashing Rounds
 
@@ -112,7 +113,7 @@ Instead of hashing the password once, the system runs the hash function thousand
 
 As GPU and CPU power available to the public keeps growing, password cracking keeps getting easier — which means defenders have to keep raising the cost, either by increasing rounds or adopting memory-hard hashing schemes designed to stay expensive even on high-end hardware.
 
-![image.png](./Sec_504_book3/image_2.png)
+![image.png](./images/image_2.png)
 
 ## Password Cracking
 
@@ -202,7 +203,7 @@ For **Unix** systems, lean on Pluggable Authentication Modules (PAM) to enforce 
 
 Finally, deploy **multi-factor authentication**. All the hardening above helps, but MFA is the single layer most likely to save your company from a costly breach.
 
-![image.png](./Sec_504_book3/image_3.png)
+![image.png](./images/image_3.png)
 
 ## Domain Password Audit Tool (DPAT)
 
@@ -256,19 +257,19 @@ This produces the full report.
 
 The overview gives a quick summary of what the report found:
 
-![image.png](./Sec_504_book3/image_4.png)
+![image.png](./images/image_4.png)
 
-![image.png](./Sec_504_book3/image_5.png)
+![image.png](./images/image_5.png)
 
 We can see password length distribution and counts.
 
 Top passwords can reveal a lot — including default passwords set by IT that never got changed.
 
-![image.png](./Sec_504_book3/image_6.png)
+![image.png](./images/image_6.png)
 
 We can also see the most commonly occurring hashes, which surfaces password reuse across employees even for hashes that weren't cracked — plus domain group analysis, historical analysis, and more.
 
-![image.png](./Sec_504_book3/image_7.png)
+![image.png](./images/image_7.png)
 
 ## Cloud Spotlight: Insecure Storage
 
@@ -276,7 +277,7 @@ Amazon S3 buckets, Google Cloud Storage buckets, and Azure Blob Storage are foun
 
 Some of the relevant AWS settings:
 
-![image.png](./Sec_504_book3/image_8.png)
+![image.png](./images/image_8.png)
 
 ### Cloud Storage Access
 
@@ -314,7 +315,7 @@ You should periodically scan your own organization's cloud footprint using these
 Enabling logging for cloud storage may require a separate bucket to receive the logs, and it's not always the easiest thing to wire up — but it's extremely valuable for the IR team when something does go wrong.
 :::
 
-![image.png](./Sec_504_book3/image_9.png)
+![image.png](./images/image_9.png)
 
 ## Netcat
 
@@ -390,7 +391,7 @@ nc -l -p 2222 | nc 10.10.10.100 80
 
 This lets the attacker interact with the final target through the relay, helping bypass firewalls and obscure attribution — but note this is a one-way relay only.
 
-![image.png](./Sec_504_book3/image_10.png)
+![image.png](./images/image_10.png)
 
 A two-way relay on Linux is also possible. First, create a named pipe to move data bidirectionally:
 
@@ -412,6 +413,6 @@ This listens for the attacker's connection, feeds incoming data to the client co
 
 **Relays & network pivoting:** strengthen internal network segmentation with layered security. Use internal firewalls to create strategic chokepoints, and use Private VLANs (PVLANs) to isolate hosts and restrict lateral movement.
 
-![image.png](./Sec_504_book3/image_11.png)
+![image.png](./images/image_11.png)
 
 **الحمد لله done**

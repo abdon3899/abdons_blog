@@ -14,7 +14,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 	// Show all top-level notes (notes in two-level deep paths like "category/note.md")
 	const topLevelNotes = allNotes.filter((note) => {
 		const parts = note.id.split("/");
-		return parts.length === 2;
+		return parts.length === 2 && !note.data.hidden;
 	});
 
 	return paginate(topLevelNotes.sort(collectionDateSort), { pageSize: MAX_NOTES_PER_PAGE });

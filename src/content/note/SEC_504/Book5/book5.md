@@ -3,7 +3,8 @@ title: "Sec 504 book5"
 description: "My personal SOC notes on Sec 504 book5."
 publishDate: "2026-04-26T00:00:00Z"
 tags: ["sans504"]
-slug: "sec-504/sans504/sec-504-book5"
+slug: "sec-504/book5"
+hidden: true
 ---
 
 The last book already :(, here we'll shift focus to what attackers do after exploitation. Of course, they don't just sit in the system; let's find out what they actually do.
@@ -55,7 +56,7 @@ DefenderCheck is a tool that helps automate this process. It takes a file and sc
 
 In the example shown, DefenderCheck scanned the Mimikatz executable and identified a 112-byte chunk that triggered Windows Defender. The attacker can then focus ghostwriting techniques on modifying just that section to create an undetected version.
 
-![image.png](./Sec_504_book5/image.png)
+![image.png](./images/image.png)
 
 ### Additional Endpoint Bypass Techniques
 
@@ -129,7 +130,7 @@ Bypassing endpoint protection is always possible with enough time — but that d
 The main benefit of these tools isn't that they stop attackers every time on the first attempt. In most cases, they'll stop the attacker initially, then the attacker finds a technique to evade it eventually. However, that first block or log gives you a heads-up. When paired with rapid incident response, this early detection may stop the entire attack chain.
 :::
 
-![image.png](./Sec_504_book5/image_1.png)
+![image.png](./images/image_1.png)
 
 ## Pivoting and Lateral Movement
 
@@ -139,7 +140,7 @@ Attackers can reuse their command-and-control (C2) access to pivot and gain acce
 
 Meterpreter offers several options to let an attacker access the internal network by reusing the C2 link. Consider this example: an attacker at `96.97.98.99` has compromised an internal system at `10.10.10.11` (through any exploitation method), making that internal system the pivot point.
 
-![image.png](./Sec_504_book5/image_2.png)
+![image.png](./images/image_2.png)
 
 Using Meterpreter, the attacker can start a proxy server listening on `96.97.98.99` that forwards all traffic through the C2 link. From inside the organization, all traffic appears to originate from `10.10.10.11`, but it's actually from the attacker.
 
@@ -191,7 +192,7 @@ Pivoting is ultimately a question of opportunity for the attacker — what new t
 
 Lateral movement involves many of the same attacks covered earlier in this course, but it also introduces new opportunities. Some attacks — like man-in-the-middle (MITM) attacks or local password harvesting — only become possible after an initial compromise or through access to a privileged network position.
 
-![image.png](./Sec_504_book5/image_3.png)
+![image.png](./images/image_3.png)
 
 ## Hijacking Attacks
 
@@ -227,7 +228,7 @@ Enable the "Turn off multicast name resolution" option. LLMNR can also be disabl
 
 Additionally, enable VLANs whenever possible and use User and Entity Behavior Analysis (UEBA) tools — either host-based or network-based — to quickly identify post-compromise activity patterns.
 
-![image.png](./Sec_504_book5/image_4.png)
+![image.png](./images/image_4.png)
 
 ## Covering Tracks
 
@@ -354,7 +355,7 @@ One of the most effective defenses is using a separate logging server. If an att
 
 For Windows, deploy Windows Event Forwarding (WEF). Combine this with User and Entity Behavioral Analytics to identify log gaps, corrupted logs, and unusual files.
 
-![image.png](./Sec_504_book5/image_5.png)
+![image.png](./images/image_5.png)
 
 ## Establishing Persistence
 
@@ -574,7 +575,7 @@ These detection methods don't scale well, so invest in an enterprise EDR tool. A
 
 Use Microsoft tools like `netstat`, `wmic`, `reg`, `schtasks`, and `sc` carefully. As an incident responder, your greatest strength in identifying persistence is understanding the techniques attackers use to achieve their goals.
 
-![image.png](./Sec_504_book5/image_6.png)
+![image.png](./images/image_6.png)
 
 ## RITA (Real Intelligence Threat Analytics)
 
@@ -622,7 +623,7 @@ The generated report includes analysis of:
 - **Long Connections** — long TCP session durations
 - **User Agents** — web browser User Agent statistics
 
-![image.png](./Sec_504_book5/image_7.png)
+![image.png](./images/image_7.png)
 
 Examine specific RITA functions directly:
 
@@ -652,19 +653,19 @@ rita show-long-connections -H mynetwork | head -15
 
 This reveals internal hosts with very long TCP/443 connections to external targets.
 
-![image.png](./Sec_504_book5/image_8.png)
+![image.png](./images/image_8.png)
 
 ### DNS Analysis
 
 RITA also analyzes DNS to reveal DNS tunneling tools like DNSCat2. The output shows query domains, the number of unique subdomains, and query frequency. Normally, subdomains for a domain are relatively few (at most hundreds). DNS tunneling tools generate many unique subdomains to avoid DNS caching.
 
-![image.png](./Sec_504_book5/image_9.png)
+![image.png](./images/image_9.png)
 
 ### RITA as a Threat Hunting Tool
 
 RITA guides analysts rather than providing a definitive list of compromised hosts. Use it as a starting point for deeper investigation: take the IPs you find, conduct OSINT, use tools like Shodan. You can blacklist or whitelist hosts in the `config.yaml` file.
 
-![image.png](./Sec_504_book5/image_10.png)
+![image.png](./images/image_10.png)
 
 ## Data Collection
 
@@ -680,7 +681,7 @@ Beyond the password hashes in `/etc/shadow`, attackers find passwords disclosed 
 
 Most of these locations require root privilege.
 
-![image.png](./Sec_504_book5/image_11.png)
+![image.png](./images/image_11.png)
 
 ### Sudo Privileges
 
@@ -748,13 +749,13 @@ Examine the log anytime:
 keyscan_dump
 ```
 
-![image.png](./Sec_504_book5/image_12.png)
+![image.png](./images/image_12.png)
 
 ### Defenses
 
 Combine network filtering with monitoring for unauthorized access attempts. Network monitoring tools and RITA can reveal C2 indicators. Endpoint security tools with application allowlists limit unauthorized tool execution. SRUM data can characterize data transfer tools by application name, revealing the extent and possible sources of exfiltrated data.
 
-![image.png](./Sec_504_book5/image_13.png)
+![image.png](./images/image_13.png)
 
 ## Cloud Spotlight: Cloud Post-Exploitation
 
@@ -933,6 +934,6 @@ Use cloud-native monitoring: Amazon Detective, Azure Sentinel, and GCP Security 
 
 Retain logs for 30–90 days, using inexpensive storage like Amazon Glacier, Azure Archive/Cool Storage, or Google Cloud Storage Archive.
 
-![image.png](./Sec_504_book5/image_14.png)
+![image.png](./images/image_14.png)
 
 **الحمد لله done**

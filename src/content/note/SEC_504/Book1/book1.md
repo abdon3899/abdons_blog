@@ -3,7 +3,8 @@ title: "Sec 504 book1"
 description: "My personal SOC notes on Sec 504 book1."
 publishDate: "2026-04-26T00:00:00Z"
 tags: ["sans504"]
-slug: "sec-504/sans504/sec-504-book1"
+slug: "sec-504/book1"
+hidden: true
 ---
 
 Incidents happen everywhere and you can't possibly be 100% safe. The question isn't *if* you will get compromised, but *when*. The main aim is to reduce the time needed to detect an incident.
@@ -16,13 +17,13 @@ Incidents happen everywhere and you can't possibly be 100% safe. The question is
 
 ## Example: The Argous Corporation Breach
 
-![cat-gun.gif](./Sec_504_book1/cat-gun.gif)
+![cat-gun.gif](./images/cat-gun.gif)
 
 Let's walk through a real-world style incident. The victim is **Argous Corporation**, and the threat actor is **Green Penguin**.
 
 Argous Corporation's network consists of a domain controller, a file server, a database server, and roughly a hundred user workstations — all behind a firewall — plus an external CRM web application.
 
-![Argous Corporation Network Diagram](./Sec_504_book1/2bb17cc9-c8b8-476b-aefe-56e8665ad16e.png)
+![Argous Corporation Network Diagram](./images/2bb17cc9-c8b8-476b-aefe-56e8665ad16e.png)
 
 The information security team noticed odd traffic to port `4444` from the CRM server. After investigation, they found `office_remoter.exe` maintaining an active connection on port `4444`, so they killed the process. They also found `Office_Techneter.exe` suspiciously connecting to port `443` and killed that too. Seeing no further odd traffic, they told the system admins the CRM server was ready to go.
 
@@ -78,7 +79,7 @@ The victim didn't check for other IOCs across the network, missing all other com
 
 Many organizations follow the **PICERL** model for incident response.
 
-![PICERL Model Diagram](./Sec_504_book1/image.png)
+![PICERL Model Diagram](./images/image.png)
 
 ### Preparation
 
@@ -129,7 +130,7 @@ The biggest structural weakness of PICERL is that **it's linear** — real incid
 
 There's no recipe for incident response. Multiple events happen simultaneously, and a linear model breaks down. Instead of thinking about phases as steps, think of them as **waypoints** or **outcomes**.
 
-![DAIR Diagram](./Sec_504_book1/image_1.png)
+![DAIR Diagram](./images/image_1.png)
 
 **Preparation → Detection → Verification** are waypoints. You don't stop everything when an incident occurs — you verify it first, then triage, then decide what actions are needed based on the evidence you have.
 
@@ -157,11 +158,11 @@ Detection sources include:
 
 Once a potential incident is detected, the first step is **verification**, followed by **triage** to determine how many resources to allocate.
 
-![Network Log Example](./Sec_504_book1/image_2.png)
+![Network Log Example](./images/image_2.png)
 
-![Host Log Example](./Sec_504_book1/11be389a-1bd5-4b1a-b5aa-8723d7c74730.png)
+![Host Log Example](./images/11be389a-1bd5-4b1a-b5aa-8723d7c74730.png)
 
-![App Log Example](./Sec_504_book1/image_3.png)
+![App Log Example](./images/image_3.png)
 
 In the network logs above, we see two hosts interacting through port `27017` (MongoDB). Suspicious handshakes suggest custom traffic, and the IP belongs to an internal host with admin privileges.
 
@@ -232,7 +233,7 @@ As the incident winds down, a final incident report is required. Common report t
 The best time to request security upgrades is right after an incident, while the pain is fresh. Schedule a follow-up meeting to discuss findings and new developments to reduce the "fading effect" over time.
 :::
 
-![Post-Incident Report Template](./Sec_504_book1/image_4.png)
+![Post-Incident Report Template](./images/image_4.png)
 
 ---
 
@@ -303,7 +304,7 @@ Derived directly from evidence — often metadata. Timestamps come from memory, 
 
 Entries represent single events, not individual artifacts. Formed from patterns and groups of timestamps from the same evidence source. This is **high-level** timeline data.
 
-![Artifact vs Event Timeline](./Sec_504_book1/image_5.png)
+![Artifact vs Event Timeline](./images/image_5.png)
 
 ---
 
@@ -453,7 +454,7 @@ Events to watch for:
 | **Sysmon** | Logs detailed system activity to the Windows Event Log |
 | **Procdump** | Captures memory dumps of running processes |
 
-![Sysinternals Suite Overview](./Sec_504_book1/b8aecba8-68a6-448b-815c-a33ca4eea5aa.png)
+![Sysinternals Suite Overview](./images/b8aecba8-68a6-448b-815c-a33ca4eea5aa.png)
 
 ---
 
@@ -511,7 +512,7 @@ Used in organizations to cache data, reduce bandwidth, and filter sites. Proxy l
 
 Each entry contains: Timestamp, Duration, Client IP, Result Code, Size, HTTP Method, URL, Username, Hierarchy Code, Content Type.
 
-![Access Log Example](./Sec_504_book1/image_6.png)
+![Access Log Example](./images/image_6.png)
 
 ---
 
@@ -558,7 +559,7 @@ vol.py --info
 
 It always starts with an **Event of Interest (EOI)**. Pull a thread with minimal information, then use plugins to progressively gather more context, pivoting from one artifact to the next.
 
-![Memory Investigation Workflow](./Sec_504_book1/11b5348b-d3cd-4b82-bb41-d5250c4151bd.png)
+![Memory Investigation Workflow](./images/11b5348b-d3cd-4b82-bb41-d5250c4151bd.png)
 
 ---
 
@@ -640,7 +641,7 @@ A snapshot-based tool that records the registry and selected file system paths a
 5. Take **Shot 2**.
 6. Click **Compare** — review added, deleted, and modified files and registry keys.
 
-![Regshot Output Example](./Sec_504_book1/image_7.png)
+![Regshot Output Example](./images/image_7.png)
 
 ### Process Monitor
 
@@ -658,7 +659,7 @@ Tools like **IDA Pro** and **Ghidra** allow low-level static analysis, but requi
 Check out **FOR610**, **SEC660**, and **SEC760** for deeper coverage of malware reverse engineering.
 :::
 
-![Malware Analysis Workflow](./Sec_504_book1/3f9409d1-97b4-4c65-a624-eb814ead4737.png)
+![Malware Analysis Workflow](./images/3f9409d1-97b4-4c65-a624-eb814ead4737.png)
 
 ---
 
@@ -690,7 +691,7 @@ All major providers operate under the **Shared Responsibility Model** — both y
 
 The higher up the stack, the less security responsibility falls on you — but you also have less control.
 
-![Shared Responsibility Model](./Sec_504_book1/57026662-ad17-448d-99b0-6ea2c76048a4.png)
+![Shared Responsibility Model](./images/57026662-ad17-448d-99b0-6ea2c76048a4.png)
 
 :::note[Example]
 For Amazon EC2, AWS secures the underlying hardware. Everything above — the OS, applications, and data — is your responsibility.
@@ -706,7 +707,7 @@ Place your IR system in a *separate account*. If the attacker has access to the 
 
 **Configuring Logging:** A comprehensive logging configuration is essential. Log every aspect of the environment that could be relevant during an investigation.
 
-![Cloud Logging Configuration](./Sec_504_book1/d13f57db-3ec9-43d9-a1e8-51cb214cdd31.png)
+![Cloud Logging Configuration](./images/d13f57db-3ec9-43d9-a1e8-51cb214cdd31.png)
 
 ### Detection
 
@@ -720,7 +721,7 @@ Use the tools recommended by your cloud provider, supplemented with manual analy
 Cloud security tools are rapidly evolving — always check current provider documentation for the latest options.
 :::
 
-![Cloud Detection Tools](./Sec_504_book1/87a75250-6616-411c-b435-3e83f401ac28.png)
+![Cloud Detection Tools](./images/87a75250-6616-411c-b435-3e83f401ac28.png)
 
 ### Containment
 
@@ -797,19 +798,3 @@ With snapshots and backups being easier in the cloud, restoring to production is
 :::tip
 Temporarily increase logging and monitoring intensity on recovered systems to detect any returning attacker activity.
 :::
-
-### Additional Considerations
-
-:::caution
-Ensure developers and DevOps teams don't **restart the system** to fix a "bug" — this destroys volatile data.
-:::
-
-- Cloud-based IR is more efficient but more costly — make sure your organization is aware of the financial implications.
-- Obtain access to **cloud support channels** — costly, but invaluable during an incident.
-- Conduct **tabletop exercises** simulating cloud-specific incident scenarios so every team member knows their role.
-
-![Cloud IR Summary](./Sec_504_book1/image_8.png)
-
----
-
-*تم بحمدالله*
